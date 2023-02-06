@@ -1,0 +1,60 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">
+		<br><br>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+		<center><h4>{{indiv.registered_vehicle_owner}}</h4></center>
+		
+		<label for='name'>Registered Vehicle Owner:</label>
+		<input disabled id="name" type="text" class="form-control" value="{{ indiv.registered_vehicle_owner }}">
+
+		<label for="ID"> Registered Owner ID: </label>
+		<input id="ID" class="form-control" type="text" value="{{indiv.registered_owner_id}}" disabled>
+
+		<label for='address'>Registered Owner's Address:</label>
+		<input disabled id="address" type="text" class="form-control" value="{{ indiv.registered_owner_address }}">
+
+		<label for='dob'>Registered Vehicle Owner's DOB:</label>
+		<input disabled id="dob" type="text" class="form-control" value="{{ indiv.registered_owner_dob }}">
+
+		<label for='doc'>Registration Date:</label>
+		<input disabled id="doc" type="text" class="form-control" value="{{ indiv.registered_owner_data_create }}">
+
+		<strong>Registered Owned Vehicle(s)</strong><br>
+		{% if vehicle %}
+			<ul>
+				{% for indV in vehicle %}
+					<li><b>City Name: </b>{{indV.city_name}}</li>
+					<li><b>Vehicle Classification: </b>{{indV.vehicle_classification}}</li>
+					<li><b>Vehicle Identification Number: </b><a href="{% url 'display-vehicle' indV %}">{{indV}}</a></li>
+					<li><b>Engine CC: </b>{{indV.engine_cc}}</li>
+					<li><b>Vehicle Brand: </b>{{indV.vehicle_brand}}</li>
+					<li><b>Vehicle Registered To: </b>{{ indV.registered_owner_id.registered_owner_id }}</li>
+					<br>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<p><strong>{{indiv}}</strong> has NO Registered Vehicle</p>
+		{% endif %}
+
+		{% if felonys %}
+			<b>Felonys for {{indiv.registered_vehicle_owner}}</b>
+			<ul>
+			{% for felony in felonys %}
+				<li><a href="{% url 'report' felony.pk %}">{{felony.incident_title}}</a></li>
+			{% endfor %}
+			</ul>
+		{% elif felonys == None %}
+			<p>{{vehicle.registered_owner_id.registered_vehicle_owner}} has No Felony(s)</p>
+		{% endif %}
+		<a class="btn btn-danger" href="{% url 'generate-details' indiv.registered_owner_id %}">Print Details of {{indiv.registered_vehicle_owner}}</a>
+	</div>
+{% endblock content %}

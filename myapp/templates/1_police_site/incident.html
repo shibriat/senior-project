@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">
+		<br><br>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+		<center><h5>Incident Report of {{report.registered_owner_id.registered_vehicle_owner}}</h5></center>
+		<label for='iid'><b>Incident ID:</b></label>
+		<input disabled id="iid" type="text" value="{{report.incident_id}}" class="form-control">
+
+		<label for='it'><b>Incident Title:</b></label>
+		<input disabled id="it" type="text" value="{{report.incident_title}}" class="form-control">
+
+		<label for='felony'><b>Felony(s) committed:</b></label>
+		<ul>
+		{% for felony in report.felony.all %}
+			<li>{{felony}}</li>
+		{% endfor %}
+		</ul>
+
+		<label for='fine'><b>Total Ammount of Fine(BDT):</b></label>
+		<input disabled id="fine" type="text" value="{{total_ammount}}" class="form-control">
+
+		<label for='oi'><b>Registered Vehicle Owner:</b></label>
+		<input disabled id="oi" type="text" value="{{report.registered_owner_id.registered_vehicle_owner}}" class="form-control">
+
+		<label for='oid'><b>Registered Vehicle Owner ID:</b></label>
+		<input disabled id="oid" type="text" value="{{report.registered_owner_id.registered_owner_id}}" class="form-control">
+
+		<label for='vin'><b>VIN:</b></label>
+		<input disabled id="vin" type="text" value="{{report.vin}}" class="form-control">
+
+		<label for='sd'><b>Submission Date:</b></label>
+		<input disabled id="sd" type="text" value="{{report.submition_date}}" class="form-control">
+
+		<label for='sb'><b>Submitted By:</b></label>
+		<input disabled id="sb" type="text" value="{{report.submitted_by}}" class="form-control">
+		
+		<a class="btn btn-danger" href="{% url 'generate-incident' report.incident_id %}">Print Report</a>
+		<a class="btn btn-success" href="{% url 'generate-bill' report.incident_id %}">Print Bill</a>
+	</div>
+{% endblock content %}

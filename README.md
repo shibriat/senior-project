@@ -1,2 +1,1 @@
-# senior-project
-IUB Senior Project
+# vehicle_licence_plate_registration_system

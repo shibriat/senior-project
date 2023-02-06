@@ -1,0 +1,62 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<br><br>
+	<div class="container">	
+		<center><h5>Run VIN</h5></center>
+		<br><br>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+		<form action="" method="POST"> {% csrf_token %}
+			<input type="text" placeholder="Search VIN" class="form-control" name="searched">
+			<input type="submit" class="form-control btn btn-secondary" value="Search" name="">
+		</form>
+		<hr>
+		{% if search %}
+			<p>You searched for {{search}}</p>
+			{% if vehicle %}
+				<div class="container">	
+					<label for="city">City Name:</label>
+					<input disabled class="form-control" type="text" id="city" value="{{vehicle.city_name}}" name="">
+					<label for="class">Vehicle Class:</label>
+					<input disabled class="form-control" type="text" id="class" value="{{vehicle.vehicle_classification}}" name="">
+					<label for="class">Vehicle Identification Number (VIN):</label>
+					<input disabled class="form-control" type="text" id="class" value="{{vehicle.vin}}" name="">
+					<label for="cc">Engine CC:</label>
+					<input disabled class="form-control" type="text" id="cc" value="{{vehicle.engine_cc}}" name="">
+					<label for="brand">Vehicle Brand:</label>
+					<input disabled class="form-control" type="text" id="brand" value="{{vehicle.vehicle_brand}}" name="">
+					<label for="owner">Registered Vehicle Owner Name:</label>
+					<input disabled class="form-control" type="text" id="owner" value="{{vehicle.registered_owner_id.registered_vehicle_owner}}" name="">
+					<label for="ownerid">Registered Vehicle Owner ID:</label>
+					<input disabled class="form-control" type="text" id="ownerid" value="{{vehicle.registered_owner_id.registered_owner_id}}" name="">
+					<br>
+					<a class="btn btn-success" href="{% url 'display-owner' vehicle.registered_owner_id.registered_owner_id %}">View Details of {{vehicle.registered_owner_id.registered_vehicle_owner}}</a>
+					
+					<a class='btn btn-danger' href="{% url 'register-incident' vehicle.vin %}">Register Incident for {{ vehicle.registered_owner_id.registered_vehicle_owner }}</a>
+						
+				</div>
+			{% endif %}
+		{% elif search == None %}
+			<p>Type something in order to search</p>
+		{% endif %}
+
+		{% if felonys %}
+			<br>
+			<b>Case(s) on this Vehicle {{vehicle}}</b><br>
+			{% for felony in felonys %}
+				<a href="{% url 'report' felony.pk %}">{{felony.incident_title}}</a><br>
+			{% endfor %}
+		{% elif felonys == None %}
+			<p>{{vehicle.registered_owner_id.registered_vehicle_owner}} has No Felony(s)</p>
+		{% endif %}
+		
+
+	</div>
+{% endblock content %}

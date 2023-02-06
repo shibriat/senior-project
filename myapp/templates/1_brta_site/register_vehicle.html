@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+
+
+{% block content %}
+	<div class="container">
+		<br><br>
+		<center><h4>Register Vehicle for {{ indivs.registered_vehicle_owner }}</h4></center>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+			        {{message}}
+			        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+
+		<form action="" method="POST"> {% csrf_token %}
+			
+			{{form.city_name}}
+			{{form.vehicle_classification}}
+			{{form.vin}}
+			{{form.engine_cc}}
+			{{form.vehicle_brand}}
+			
+			<select name='registered_owner_id' class="form-control">
+				<option value='{{ indivs.registered_owner_id }}' selected>{{indivs}}</option>
+			</select>
+			<input class="form-control btn btn-secondary" type="submit" value="Register vehicle">
+		</form>
+	</div>
+{% endblock content %}

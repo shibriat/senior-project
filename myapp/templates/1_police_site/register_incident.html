@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">	
+		<br><br>
+		<center><h5>Register Incident for {{vehicle.registered_owner_id.registered_vehicle_owner}}</h5></center>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+		<form action="" method="POST"> {% csrf_token %}
+			{{form.incident_title}}
+
+			<label>Select felony(s): Press CTRL while selecting</label>
+			{{form.felony}}
+
+			<select name='registered_owner_id' class="form-control">
+				<option value="{{vehicle.registered_owner_id.registered_owner_id}}" selected>
+					{{vehicle.registered_owner_id}}
+				</option>
+			</select>
+
+			<select name='vin' class="form-control">
+				<option value="{{vehicle.vin}}" selected>
+					{{vehicle}}
+				</option>
+			</select>
+
+			<select name='submitted_by' class="form-control">
+				<option value="{{user.id}}" selected>
+					{{user}}
+				</option>
+			</select>
+
+			<input type="submit" class="form-control btn btn-secondary">
+		</form>
+	</div>
+{% endblock content %}

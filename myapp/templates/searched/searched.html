@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">	
+
+		{% if searched %}
+			<center>
+				<h5>Search Results</h5>
+				<p>You Searched for "{{ searched }}"</p>
+			</center>
+			{% if results or results_owner%}
+				{% for result in results %}
+					{% if role == 'BRTA_Staff' or role == 'Admin' %}
+						<a href="{% url 'update-vehicle' result.pk %}">{{result}}</a><br>
+						<hr>
+					{% elif role == 'Police' or role == 'Admin' %}
+						<a href="{% url 'display-vehicle' result.pk %}">{{result}}</a><br>
+						<hr>
+					{% endif %}
+				{% endfor %}
+			
+				{% for resultowner in results_owner %}
+					{% if role == 'BRTA_Staff' or role == 'Admin' %}
+						<a href="{% url 'update-vehicle-owner' resultowner.pk %}"> {{ resultowner }} </a>
+						<hr>
+					{% elif role == 'Police' or role == 'Admin' %}
+						<a href="{% url 'display-owner' resultowner.pk %}"> {{ resultowner }} </a>
+						<hr>
+					{% endif %}
+				{% endfor %}
+			{% else %}
+				<p>NO search result found for "{{searched}}"</p>
+			{% endif %}
+		{% else %}
+			<p> You have to write something in the searchbox in order to search </p>
+		{% endif %}
+	</div>
+{% endblock content %}

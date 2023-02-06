@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+			<div class="text-center">
+				<br><br>
+				{% if messages %}
+		        	{% for message in messages %}
+				        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+				          {{message}}
+				          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				        </div>
+				    {% endfor %}
+				{% endif %}
+				<center><h5>Extract VIN from Picture</h5></center>
+					<form action="" method="POST" enctype="multipart/form-data">
+					  {% csrf_token %}
+					  <p>
+					    <input type="file" accept="image/*" name="image" id="file" onchange="loadFile(event)" style="display: none;">
+					  </p>
+					  <p>
+					    <label for="file" style="cursor: pointer;">Upload Image</label>
+					  </p>
+					  <p>
+					    <img id="output" width="200" />
+					  </p>
+					  <input class="btn btn-success" type="submit" value="Check Licence Plate">
+					</form>
+					<hr>
+					<p>Scanned VIN: {{vin}}</p>
+			</div>
+				<br><br>
+			{% if vin %}
+				<div class="container">	
+					<label for="city">City Name:</label>
+					<input disabled class="form-control" type="text" id="city" value="{{vehicle.city_name}}" name="">
+					<label for="class">Vehicle Class:</label>
+					<input disabled class="form-control" type="text" id="class" value="{{vehicle.vehicle_classification}}" name="">
+					<label for="class">Vehicle Identification Number (VIN):</label>
+					<input disabled class="form-control" type="text" id="class" value="{{vin}}" name="">
+					<label for="cc">Engine CC:</label>
+					<input disabled class="form-control" type="text" id="cc" value="{{vehicle.engine_cc}}" name="">
+					<label for="brand">Vehicle Brand:</label>
+					<input disabled class="form-control" type="text" id="brand" value="{{vehicle.vehicle_brand}}" name="">
+					<label for="owner">Registered Vehicle Owner Name:</label>
+					<input disabled class="form-control" type="text" id="owner" value="{{vehicle.registered_owner_id.registered_vehicle_owner}}" name="">
+					<label for="ownerid">Registered Vehicle Owner ID:</label>
+					<input disabled class="form-control" type="text" id="ownerid" value="{{vehicle.registered_owner_id.registered_owner_id}}" name="">
+					<br>
+					<a class="btn btn-success" href="{% url 'display-owner' vehicle.registered_owner_id.registered_owner_id %}">View Details of {{vehicle.registered_owner_id.registered_vehicle_owner}}</a>
+					
+					<a class='btn btn-danger' href="{% url 'register-incident' vehicle.vin %}">Register Incident for {{ vehicle.registered_owner_id.registered_vehicle_owner }}</a>
+					{% if felonys %}
+						<br><br>
+						<b>Case(s) on this Vehicle {{vehicle}}</b><br>
+						{% for felony in felonys %}
+							<a href="{% url 'report' felony.pk %}">{{felony.incident_title}}</a><br>
+						{% endfor %}
+					{% endif %}
+
+				</div>
+			{% endif %}
+	
+	<script>
+		var loadFile = function(event) {
+			var image = document.getElementById('output');
+			image.src = URL.createObjectURL(event.target.files[0]);
+		};
+
+
+		var form = document.querySelector("form");
+		form.addEventListener("submit", function(event) {
+		    event.preventDefault();
+		    var image = document.getElementById('output');
+		    var formData = new FormData();
+		    formData.append("image", image.src);
+		    var xhr = new XMLHttpRequest();
+		    xhr.open("POST", form.action);
+		    xhr.send(formData);
+		});
+
+
+
+	</script>
+{% endblock content %}

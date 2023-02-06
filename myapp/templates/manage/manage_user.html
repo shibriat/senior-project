@@ -1,0 +1,24 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">
+		<br><br>
+		<center><h2>Registered Users List</h2></center>
+			{% if messages %}
+				{% for message in messages %}
+      				<div class="alert alert-warning alert-dismissible fade show" role="alert">
+        				{{message}}
+        				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      				</div>
+    			{% endfor %}
+			{% endif %}
+			<ul class="list-group list-group-flush">
+			{% for indiv in users %}
+				<li class="list-group-item">
+					<a href="{% url 'update-user' indiv.id %}">{{indiv}}</a>
+				</li>
+			{% endfor %}
+			</ul>
+		
+	</div>
+{% endblock content %}

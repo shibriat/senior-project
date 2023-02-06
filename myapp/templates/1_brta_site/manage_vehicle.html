@@ -1,0 +1,45 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">
+		<br><br>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+		<center><h4>Vehicle Details and Registration</h4></center>
+		<form action="" method="POST"> {% csrf_token %}
+			{{form.as_table}}
+			{% if role != 'Police' %}
+				<input class="btn btn-warning" type="submit" value="Update" name="">
+				<a href="{% url 'delete-vehicle' vin %}" class='btn btn-danger'>Delete</a>
+			{% endif %}<br><br>
+			<strong>Current Owned Vehicle(s):</strong>
+			<ul>
+				<li>
+					<div><b>Registered Owner</b>: <a href="{% url 'update-vehicle-owner' vehicle.registered_owner_id.pk %}">{{vehicle.registered_owner_id.registered_vehicle_owner}}</a></div>
+				</li>
+
+				<li>
+					<div><b>Registered Owner ID</b>: <a href="{% url 'update-vehicle-owner' vehicle.registered_owner_id.pk %}">{{vehicle.registered_owner_id.registered_owner_id}}</a></div>
+				</li>
+
+				<li>
+					<div><b>Registered Owner Address</b>: {{vehicle.registered_owner_id.registered_owner_address}}</div>
+				</li>
+
+				<li>
+					<div><b>Registered Owner DOB</b>: {{vehicle.registered_owner_id.registered_owner_dob}}</div>
+				</li>
+
+				<li>
+					<div><b>Data Creation Date</b>: {{vehicle.registered_owner_id.registered_owner_data_create}}</div>
+				</li>
+			</ul>
+		</form>
+	</div>
+{% endblock content %}

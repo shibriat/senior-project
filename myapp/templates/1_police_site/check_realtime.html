@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+{% block scripts %}
+	<script type="text/javascript" src="https://unpkg.com/webcam-easy@1.0.5/dist/webcam-easy.min.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+{% endblock scripts %}
+{% block content %}
+	<div class="text-center">
+		<br><br>
+		<center><h5>Extract VIN Realtime</h5></center>
+		<video id="webcam-stream" class="rounded mx-auto d-block img-fluid" autoplay></video>
+		<form id="frame-form" method="post" enctype="multipart/form-data">
+		    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+		    <input type="hidden" id="frame-data" name="frame_data"> <br>
+		    <button type="submit" class="btn btn-success">Check Licence Plate</button>
+		    <p>Scanned VIN: {{vin}}</p>
+		</form>
+		
+	</div>
+	{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+	{% if vin %}
+		<div class="container">	
+			<label for="city">City Name:</label>
+			<input disabled class="form-control" type="text" id="city" value="{{vehicle.city_name}}" name="">
+			<label for="class">Vehicle Class:</label>
+			<input disabled class="form-control" type="text" id="class" value="{{vehicle.vehicle_classification}}" name="">
+			<label for="class">Vehicle Identification Number (VIN):</label>
+			<input disabled class="form-control" type="text" id="class" value="{{vin}}" name="">
+			<label for="cc">Engine CC:</label>
+			<input disabled class="form-control" type="text" id="cc" value="{{vehicle.engine_cc}}" name="">
+			<label for="brand">Vehicle Brand:</label>
+			<input disabled class="form-control" type="text" id="brand" value="{{vehicle.vehicle_brand}}" name="">
+			<label for="owner">Registered Vehicle Owner Name:</label>
+			<input disabled class="form-control" type="text" id="owner" value="{{vehicle.registered_owner_id.registered_vehicle_owner}}" name="">
+			<label for="ownerid">Registered Vehicle Owner ID:</label>
+			<input disabled class="form-control" type="text" id="ownerid" value="{{vehicle.registered_owner_id.registered_owner_id}}" name="">
+			<br>
+			<a class="btn btn-success" href="{% url 'display-owner' vehicle.registered_owner_id.registered_owner_id %}">View Details of {{vehicle.registered_owner_id.registered_vehicle_owner}}</a>		
+			<a class='btn btn-danger' href="{% url 'register-incident' vehicle.vin %}">Register Incident for {{ vehicle.registered_owner_id.registered_vehicle_owner }}</a>
+			{% if felonys %}
+				<br><br>
+				<b>Case(s) on this Vehicle {{vehicle}}</b><br>
+				{% for felony in felonys %}
+					<a href="{% url 'report' felony.pk %}">{{felony.incident_title}}</a><br>
+				{% endfor %}
+			{% endif %}
+				
+		</div>
+	{% endif %}
+	<canvas style="visibility: hidden;" id="webcam-frame"></canvas>
+
+	<script type="text/javascript">		
+		var form = document.getElementById("frame-form");
+		var video = document.getElementById("webcam-stream");
+		var canvas = document.getElementById("webcam-frame");
+		var context = canvas.getContext("2d");
+
+
+		navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment"}})
+	    .then(function(stream) {
+	        video.srcObject = stream;
+	    })
+	    .catch(function(error) {
+	        console.log("Error accessing webcam: ", error);
+	    });
+
+		form.addEventListener("submit", function(event) {
+		    event.preventDefault();
+		    canvas.width = video.videoWidth;
+		    canvas.height = video.videoHeight;
+		    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+		    var dataURL = canvas.toDataURL();
+		    var input = document.getElementById("frame-data");
+		    input.value = dataURL;
+		    form.submit();
+		});
+	</script>
+
+{% endblock content %}

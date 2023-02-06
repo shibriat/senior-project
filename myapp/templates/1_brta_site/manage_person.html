@@ -1,0 +1,46 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+	<div class="container">
+		<br><br>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
+		<center><h4>{{indiv.registered_vehicle_owner}}</h4></center>
+		<form action="" method="POST"> {% csrf_token %}
+			{{form.as_table}}
+			<label for="ID"> Registered Owner ID: </label>
+			<input id="ID" class="form-control" type="text" value="{{indiv.registered_owner_id}}" disabled>
+			<br>
+			{% if role != 'Police' %}
+				<input class="btn btn-warning" type="submit" value="Update" name="">
+				<a href="{% url 'delete-vehicle-owner' owner_id %}" class='btn btn-danger'>Delete</a>
+				<a class="btn btn-success" href="{% url 'details' indiv.registered_owner_id %}">Print Detailed Report on {{indiv.registered_vehicle_owner}}</a>
+				<a class='btn btn-primary' href="{% url 'register-vehicle' indiv.pk %}">Register a New Vehicle for {{ indiv.registered_vehicle_owner }}</a>
+			{% endif %}
+			<br><br>
+			<strong>Registered Owned Vehicle(s)</strong><br>
+			{% if vehicle %}
+				<ul>
+					{% for indV in vehicle %}
+						<li><div><b>City Name: </b>{{indV.city_name}}</div></li>
+						<li><div><b>Vehicle Classification: </b>{{indV.vehicle_classification}}</div></li>
+						<li><div><b>Vehicle Identification Number: </b><a href="{% url 'update-vehicle' indV %}">{{indV}}</a></div></li>
+						<li><div><b>Engine CC: </b>{{indV.engine_cc}}</div></li>
+						<li><div><b>Vehicle Brand: </b>{{indV.vehicle_brand}}</div></li>
+						<li><div><b>Vehicle Registered To: </b>{{ indV.registered_owner_id.registered_owner_id }}</div></li>
+						<br>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<p><strong>{{indiv}}</strong> has NO Registered Vehicle</p>
+			{% endif %}
+		</form>
+		
+	</div>
+{% endblock content %}
