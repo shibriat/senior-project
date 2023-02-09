@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    {% block scripts %} {% endblock scripts %}
+  </head>
+  <body>
+  	
+    <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+		  <div class="container-fluid">
+		    <a class="navbar-brand" href="#">App</a>
+		    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		      <span class="navbar-toggler-icon"></span>
+		    </button>
+
+		    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+		      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+		    		{% if role == 'Police' or role == 'Admin' %}
+			        <li class="nav-item">
+			          <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
+			        </li>
+		       		<li class="nav-item dropdown">
+			          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			            Checkplate
+			          </a>
+			          <ul class="dropdown-menu">
+			            <li><a class="dropdown-item" href="{% url 'checkplate-realtime' %}">Realtime detection</a></li>
+			            <li><a class="dropdown-item" href="{% url 'readpicture' %}">Read From Picture</a></li>
+			            <li><a class="dropdown-item" href="{% url 'run-vin' %}">Run VIN</a></li>
+			          </ul>
+		        	</li>
+		        {% endif %}
+		        {% if role == 'BRTA_Staff' or role == 'Admin' %}
+				      <li class="nav-item dropdown">
+			          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			            Manage Database
+			          </a>
+			          <ul class="dropdown-menu">
+			            <li><a class="dropdown-item" href="{% url 'display-database' %}">Display Database</a></li>
+			            <li><a class="dropdown-item" href="{% url 'register-user' %}">Register Vehicle Owner</a></li>
+			          </ul>
+			        </li>
+				      
+				      
+			      {% endif %}
+
+		        {% if role == 'Admin' %}
+				      <li class="nav-item dropdown">
+			          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			            Manage Application
+			          </a>
+			          <ul class="dropdown-menu">
+			            <li><a class="dropdown-item" href="{% url 'register' %}">Register User</a></li>
+			            <li><a class="dropdown-item" href="{% url 'manage-user' %}">Manage User</a></li>
+			          </ul>
+			        </li>
+				      
+				      
+			      {% endif %}
+		        
+		        {% if user.is_authenticated %}
+		        <li class="nav-item" href="#">
+		          <a class="nav-link"><div>{{user}}</div></a>
+		        </li>
+		        <li class="nav-item">
+		          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+		        </li>
+
+			        
+
+		        {% else %}
+		        <li class="nav-item">
+		          <a class="nav-link" href="{% url 'login' %}">Login</a>
+		        </li>
+		        {% endif %}
+
+		        
+
+		      </ul>
+		      <form class="d-flex" role="search" action="{% url 'search' %}" method="POST"> {% csrf_token %}
+		        <input name="searched" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+		        <input type="submit" value="Search" class="btn btn-dark" >
+		      </form>
+		    </div>
+		  </div>
+		</nav>
+
+		{% block content %}{% endblock content %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+  </body>
+</html>

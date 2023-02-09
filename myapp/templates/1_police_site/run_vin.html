@@ -3,8 +3,7 @@
 {% block content %}
 <br><br>
 	<div class="container">	
-		<center><h5>Run VIN</h5></center>
-		<br><br>
+		<h3>Run Vin</h3>
 		{% if messages %}
         	{% for message in messages %}
 		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -13,10 +12,17 @@
 		        </div>
 		    {% endfor %}
 		{% endif %}
-		<form action="" method="POST"> {% csrf_token %}
-			<input type="text" placeholder="Search VIN" class="form-control" name="searched">
-			<input type="submit" class="form-control btn btn-secondary" value="Search" name="">
-		</form>
+		<div class="row">
+			<div class="col-md-6">
+				<form action="" method="POST"> {% csrf_token %}
+					<input type="text" placeholder="Search VIN" class="form-control" name="searched">
+			</div>
+			<div class="col-md-2">
+				<button type="submit" class="form-control btn btn-secondary">Search</button>
+			</form>
+			</div>
+		</div>
+		
 		<hr>
 		{% if search %}
 			<p>You searched for {{search}}</p>

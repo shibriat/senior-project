@@ -9,7 +9,9 @@
 	<div class="text-center">
 		<br><br>
 		<center><h5>Extract VIN Realtime</h5></center>
+		<div class="container">	
 		<video id="webcam-stream" class="rounded mx-auto d-block img-fluid" autoplay></video>
+		</div>
 		<form id="frame-form" method="post" enctype="multipart/form-data">
 		    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 		    <input type="hidden" id="frame-data" name="frame_data"> <br>
