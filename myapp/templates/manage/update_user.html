@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-
+{% block title %}Update User{% endblock title %}
 {% block content %}
 	<div class="container">
 		<br><br>
@@ -14,7 +14,7 @@
 			{{form.as_table}} <br>
 			<input class="btn btn-success" value="Update" type="submit">
 			<a class='btn btn-danger' href="{% url 'delete-user' userid %}">Remove</a>
-			<a class='btn btn-secondary' href="{% url 'manage-user-role' userprof %}">Manage Roles</a>
+			<a class='btn btn-secondary' href="{% url 'manage-user-role' userid %}">Manage Roles</a>
 		</form>
 	</div>
 {% endblock content %}

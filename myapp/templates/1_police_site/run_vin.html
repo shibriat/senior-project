@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-
+{% block title %}Run VIN{% endblock title %}
 {% block content %}
 <br><br>
 	<div class="container">	
@@ -60,7 +60,7 @@
 				<a href="{% url 'report' felony.pk %}">{{felony.incident_title}}</a><br>
 			{% endfor %}
 		{% elif felonys == None %}
-			<p>{{vehicle.registered_owner_id.registered_vehicle_owner}} has No Felony(s)</p>
+			<p>{{vehicle.registered_owner_id.registered_vehicle_owner}} has No Case(s)</p>
 		{% endif %}
 		
 
