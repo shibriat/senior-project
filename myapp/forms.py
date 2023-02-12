@@ -83,10 +83,12 @@ class VehicleOwnerForm(ModelForm):
 	class Meta:
 		model = registered_vehicle_owner_table
 		fields = (	'registered_vehicle_owner',
+					'registered_owner_email',
 					'registered_owner_address',
 					'registered_owner_dob')
 		labels = {
 			'registered_vehicle_owner': 'Registered Vehicle Owner',
+			'registered_owner_email': 'Email Address',
 			'registered_owner_address': "Registered Owner's Address",
 			'registered_owner_dob': 'DOB'
 		}
@@ -96,6 +98,11 @@ class VehicleOwnerForm(ModelForm):
 				attrs={
 					'class': 'form-control',
 					'Placeholder': 'Vehicle Owner',
+				}),
+			'registered_owner_email': forms.EmailInput(
+				attrs={
+					'class': 'form-control',
+					'Placeholder': 'Email Address',
 				}),
 			'registered_owner_address': forms.TextInput(
 				attrs={

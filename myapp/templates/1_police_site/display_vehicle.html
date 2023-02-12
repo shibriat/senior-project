@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-
+{% block title %}VIN: {{vehicle.vin}}{% endblock title %}
 {% block content %}
 	<div class="container">
 		<br><br><br>
@@ -43,6 +43,10 @@
 			</li>
 
 			<li>
+				<div><b>Registered Owner's Email Address</b>: {{vehicle.registered_owner_id.registered_owner_email}}</div>
+			</li>
+
+			<li>
 				<div><b>Registered Owner Address</b>: {{vehicle.registered_owner_id.registered_owner_address}}</div>
 			</li>
 
@@ -61,7 +65,7 @@
 				<a href="{% url 'report' felony.pk %}">{{felony.incident_title}}</a><br>
 			{% endfor %}
 		{% elif felonys == None %}
-			<p>{{vehicle.registered_owner_id.registered_vehicle_owner}} has No Felony(s)</p>
+			<p>{{vehicle.registered_owner_id.registered_vehicle_owner}} has No Case(s)</p>
 		{% endif %}
 	</div>
 {% endblock content %}

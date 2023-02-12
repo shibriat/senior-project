@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-
+{% block title %}{{indiv.registered_vehicle_owner}}{% endblock title %}
 {% block content %}
 	<div class="container">
 		<br><br>
@@ -18,6 +18,9 @@
 
 		<label for="ID"> Registered Owner ID: </label>
 		<input id="ID" class="form-control" type="text" value="{{indiv.registered_owner_id}}" disabled>
+
+		<label for='email'>Registered Owner's Email Address:</label>
+		<input disabled id="email" type="text" class="form-control" value="{{ indiv.registered_owner_email }}">
 
 		<label for='address'>Registered Owner's Address:</label>
 		<input disabled id="address" type="text" class="form-control" value="{{ indiv.registered_owner_address }}">

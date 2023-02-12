@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-
+{% block title %}{{vin}}{% endblock title %}
 {% block content %}
 	<div class="container">
 		<br><br>
@@ -26,6 +26,10 @@
 
 				<li>
 					<div><b>Registered Owner ID</b>: <a href="{% url 'update-vehicle-owner' vehicle.registered_owner_id.pk %}">{{vehicle.registered_owner_id.registered_owner_id}}</a></div>
+				</li>
+
+				<li>
+					<div><b>Registered Owner's Email Address</b>: {{vehicle.registered_owner_id.registered_owner_email}}</div>
 				</li>
 
 				<li>
