@@ -27,6 +27,7 @@ class UserProfile(models.Model):
 class registered_vehicle_owner_table(models.Model):
 	registered_vehicle_owner = models.CharField(max_length=30, null=False, blank=False)
 	registered_owner_id = models.UUIDField(primary_key=True,default = uuid.uuid4, editable = False)
+	registered_owner_email = models.EmailField(max_length=255, null=False, blank=False)
 	registered_owner_address = models.CharField(max_length=160)
 	registered_owner_dob = models.DateField()
 	registered_owner_data_create = models.DateTimeField(auto_now_add=True)
