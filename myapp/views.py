@@ -167,27 +167,6 @@ def register_user(request):
 				})
 		else:
 			return redirect('home')
-    if request.user.is_authenticated:
-        if checkuserrole(request) == 'Admin':
-            form = CreateUserForm()
-            if request.method == "POST":
-                form = CreateUserForm(request.POST)
-                if form.is_valid():
-                    form.save()
-                    messages.add_message(
-                        request, messages.SUCCESS, 'User Registered Successfully')
-                else:
-                    messages.add_message(request, messages.INFO, 'Error')
-
-            return render(request, 'register/register.html', {
-                'form': form,
-                'role': checkuserrole(request),
-            })
-        else:
-            return redirect('home')
-
-    else:
-        return redirect('login')
 
 
 def manage_user(request):

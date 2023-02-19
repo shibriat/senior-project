@@ -120,27 +120,3 @@
 </script>
 </body>
 </html>
-{% extends 'base/base.html' %}
-{% block title %}Register User{% endblock title %}
-{% block content %}
-<div class="container">
-	<br><br>
-	<h2>Register User</h2>
-
-	{% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{message}}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-
-	<form class="" action="" method="POST"> {% csrf_token %}
-		{{form.as_table}}
-		
-		<input type="submit" class="btn btn-secondary form-control" value="Register" name="submit">
-		
-	</form>
-</div>
-{% endblock content %}
