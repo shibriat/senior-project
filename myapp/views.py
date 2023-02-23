@@ -48,7 +48,7 @@ def checkuserrole(request):
     else:
         return redirect('login')
 
-
+# Function to extract VIN from Image
 def get_vin(frame):
 
     # Defining dictionary to translate bangla numbers to english number
@@ -66,7 +66,7 @@ def get_vin(frame):
     }
 
     
-
+    # Transformimg Image from colored to Gray
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Preprocess the image to highlight the text regions
@@ -77,10 +77,12 @@ def get_vin(frame):
     # Detect the location of the text regions
     # boxes = pytesseract.image_to_boxes(gray, lang='ben', config='--oem 3 --psm 3')
     
+    # Extracting strings from image Language = lang='ben' and config
     results = pytesseract.image_to_string(gray, lang='ben', config='--psm 3')
     
     print(results)
-
+	
+    # Filtering the Unwanted Characters from vin number string
     texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
     vins = ""
     for text in texts:
@@ -91,14 +93,15 @@ def get_vin(frame):
     for text in vins:
         vin = vin + str(dic[text])
     del vins
-
+    # If length of vin is equal to six then return the vin (CORECT)
     if len(vin) == 6:
         return str(vin)
     else:
+	# Extracting strings from image Language = lang='ben' and config
         results = pytesseract.image_to_string(gray, lang='ben', config='--psm 6')
         print(results)
 
-        
+       	# Filtering the Unwanted Characters from vin number string 
         texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
         
         vins = ""
@@ -110,7 +113,7 @@ def get_vin(frame):
         for text in vins:
             vin = vin + str(dic[text])
         del vins
-
+	# If length of vin is equal to six then return the vin (CORECT)
         if len(vin) == 6:
             return str(vin)
 
@@ -609,6 +612,7 @@ def checkplate_realtime(request):
                         base64.b64decode(frame_data), np.uint8)
                     # Convert numpy array to video frame
                     video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+		# Function defined at Line number 51
                 vin = get_vin(video_frame)
                 print(vin)
                 try:
@@ -636,6 +640,7 @@ def checkplate_picture(request):
                     # Convert the bytes to a NumPy array
                     image_bytes = image.read()
                     image_array = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), -1)
+		    # Function defined at Line number 51
                     vin = get_vin(image_array)
                     print('\nvin:', vin)
                     try:
