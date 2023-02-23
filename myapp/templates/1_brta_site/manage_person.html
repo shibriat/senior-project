@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% block title %}{{indiv.registered_vehicle_owner}}{% endblock title %}
 {% block content %}
-	<div class="container">
+	<div class="container" id="container">
 		<br><br>
 		{% if messages %}
         	{% for message in messages %}
@@ -11,8 +11,8 @@
 		        </div>
 		    {% endfor %}
 		{% endif %}
-		<center><h4>{{indiv.registered_vehicle_owner}}</h4></center>
-		<form action="" method="POST"> {% csrf_token %}
+		<center id="name"><h4>{{indiv.registered_vehicle_owner}}</h4></center>
+		<form action="" method="POST" id="form"> {% csrf_token %}
 			{{form.as_table}}
 			<label for="ID"> Registered Owner ID: </label>
 			<input id="ID" class="form-control" type="text" value="{{indiv.registered_owner_id}}" disabled>
@@ -22,11 +22,14 @@
 				<a href="{% url 'delete-vehicle-owner' owner_id %}" class='btn btn-danger'>Delete</a>
 				<a class="btn btn-success" href="{% url 'details' indiv.registered_owner_id %}">Print Detailed Report on {{indiv.registered_vehicle_owner}}</a>
 				<a class='btn btn-primary' href="{% url 'register-vehicle' indiv.pk %}">Register a New Vehicle for {{ indiv.registered_vehicle_owner }}</a>
+				
 			{% endif %}
-			<br><br>
+		</form>
+		<br>
+		<!-- <button onclick="printPage()" class='btn btn-danger'>Print</button><br> -->
 			<strong>Registered Owned Vehicle(s)</strong><br>
 			{% if vehicle %}
-				<ul>
+				<ul id="ul">
 					{% for indV in vehicle %}
 						<li><div><b>City Name: </b>{{indV.city_name}}</div></li>
 						<li><div><b>Vehicle Classification: </b>{{indV.vehicle_classification}}</div></li>
@@ -40,7 +43,20 @@
 			{% else %}
 				<p><strong>{{indiv}}</strong> has NO Registered Vehicle</p>
 			{% endif %}
-		</form>
 		
 	</div>
+	<script type="text/javascript">
+		function printPage(){
+			// INSTANTIATING THE VARIABLES WHICH NEEDS TO BE PRINTED 
+			var div = document.getElementById('container').innerHTML;
+			var form = document.getElementById('form').innerHTML;
+			var ul = document.getElementById('ul').innerHTML;
+
+			// STORING THEM TO THE DIV
+			document.getElementById('container').innerHTML = name + form + ul;
+
+			// PRINT THE WINDOW WITH THE CHOSEN TAGS/ATTRIBUTE/ DATA
+			window.print();
+		}
+	</script>
 {% endblock content %}

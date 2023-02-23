@@ -12,10 +12,8 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 import base64
 
-import torch
-from easyocr import Reader
 import re
-
+import pytesseract
 import cv2
 import numpy as np
 
@@ -28,6 +26,14 @@ from reportlab.lib.pagesizes import letter, A4
 import smtplib
 import ssl
 from email.message import EmailMessage
+
+
+from PIL import Image
+
+
+import cv2
+import os
+import tempfile
 
 
 def checkuserrole(request):
@@ -59,26 +65,54 @@ def get_vin(frame):
         '৯': '9'
     }
 
-    reader = Reader(['bn'], gpu=True)
-    results = reader.readtext(frame)
+    
 
-    text = ''
-    for result in results:
-        text = text + result[1]
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    texts = re.findall("[০১২৩৪৫৬৭৮৯]*", text)
-    del text
-    vins = ''
+    # Preprocess the image to highlight the text regions
+    gray = cv2.medianBlur(gray, 5)
+    gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    gray = cv2.erode(gray, None, iterations=1)
+
+    # Detect the location of the text regions
+    # boxes = pytesseract.image_to_boxes(gray, lang='ben', config='--oem 3 --psm 3')
+    
+    results = pytesseract.image_to_string(gray, lang='ben', config='--psm 3')
+    
+    print(results)
+
+    texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
+    vins = ""
     for text in texts:
         if text is not None:
             vins = vins + text
-
-    vin = ''
+    del texts
+    vin = ""
     for text in vins:
         vin = vin + str(dic[text])
     del vins
-    return str(vin)
 
+    if len(vin) == 6:
+        return str(vin)
+    else:
+        results = pytesseract.image_to_string(gray, lang='ben', config='--psm 6')
+        print(results)
+
+        
+        texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
+        
+        vins = ""
+        for text in texts:
+            if text is not None:
+                vins = vins + text
+        del texts
+        vin = ""
+        for text in vins:
+            vin = vin + str(dic[text])
+        del vins
+
+        if len(vin) == 6:
+            return str(vin)
 
 # Mail the notification to the users
 def sendmail(request, subject, message, email_receiver):
@@ -195,10 +229,10 @@ def manage_user_role(request, userid):
                 user = User.objects.get(pk=userid)
 
                 sendmail(request, 'User Role Update', f"""
-					Dear {user.username}, 
-					your role has been updated to {instances.role}, 
+					Dear {user.username},
+					your role has been updated to {instances.role},
 
-					Regards 
+					Regards
 					{request.user}""", user.email)
             return render(request, 'manage/manage_user_role.html', {'data': data,
                                                                     'form': form,
@@ -423,7 +457,7 @@ def update_vehicle(request, vin):
 					Dear {registered_vehicle_owner_table.objects.get(pk=vehicle.registered_owner_id.registered_owner_id).registered_vehicle_owner},
 					Your details of the vehicle with following information City name: {request.POST['city_name']}, Classification: {request.POST['vehicle_classification']}, VIN: {request.POST['vin']}
 					Model: {request.POST['vehicle_brand']}, Engine CC: {request.POST['engine_cc']}
-					has been updated 
+					has been updated
 
 					Regards,
 					License Plate Tracking System
@@ -576,13 +610,15 @@ def checkplate_realtime(request):
                     # Convert numpy array to video frame
                     video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 vin = get_vin(video_frame)
+                print(vin)
                 try:
-                    vehicle = vehicle_license_plate_registration_table.objects.get(
-                        pk=vin)
+                    vehicle = vehicle_license_plate_registration_table.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
                 except:
+                    print('\ntouched null part\n')
                     vehicle = None
                     felonys = None
+                
                 return render(request, '1_police_site/check_realtime.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, 'role': checkuserrole(request), })
             return render(request, '1_police_site/check_realtime.html', {'role': checkuserrole(request), })
         else:
@@ -597,15 +633,11 @@ def checkplate_picture(request):
             if request.method == 'POST':
                 try:
                     image = request.FILES.get('image')
-                    print('image type: ', image)
-                    image = cv2.imdecode(np.fromstring(
-                        image.read(), np.uint8), cv2.IMREAD_UNCHANGED)
-
-                    # Convert the image to a video frame
-                    frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-                    vin = get_vin(frame)
-
+                    # Convert the bytes to a NumPy array
+                    image_bytes = image.read()
+                    image_array = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), -1)
+                    vin = get_vin(image_array)
+                    print('\nvin:', vin)
                     try:
                         vehicle = vehicle_license_plate_registration_table.objects.get(
                             pk=vin)
@@ -613,6 +645,7 @@ def checkplate_picture(request):
                     except:
                         vehicle = None
                         felonys = None
+
                     return render(request, '1_police_site/read_picture.html', {'vin': vin,
                                                                                'vehicle': vehicle,
                                                                                'felonys': felonys,
@@ -620,7 +653,8 @@ def checkplate_picture(request):
                 except:
                     try:
                         print('touched\n')
-                        return render(request, '1_police_site/read_picture.html', {'role': checkuserrole(request), })
+                        return render(request, '1_police_site/read_picture.html', {'vin': vin,
+                                                                                   'role': checkuserrole(request), })
                     except:
                         pass
             return render(request, '1_police_site/read_picture.html', {'role': checkuserrole(request), })
