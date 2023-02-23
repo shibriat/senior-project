@@ -19,6 +19,9 @@
 		    <button type="submit" class="btn btn-success">Check Licence Plate</button>
 		    <p>Scanned VIN: {{vin}}</p>
 		</form>
+		{% if vin and vehicle is None %}
+			<p>No Vehicle found having this VIN: {{vin}}</p>
+		{% endif %}
 		
 	</div>
 	{% if messages %}
@@ -29,7 +32,7 @@
 		        </div>
 		    {% endfor %}
 		{% endif %}
-	{% if vin %}
+	{% if vehicle %}
 		<div class="container">	
 			<label for="city">City Name:</label>
 			<input disabled class="form-control" type="text" id="city" value="{{vehicle.city_name}}" name="">

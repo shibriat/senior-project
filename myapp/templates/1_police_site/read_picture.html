@@ -27,9 +27,12 @@
 					</form>
 					<hr>
 					<p>Scanned VIN: {{vin}}</p>
+					{% if vin and vehicle is None %}
+						<p>No Vehicle found having this VIN: {{vin}}</p>
+					{% endif %}
 			</div>
 				<br><br>
-			{% if vin %}
+			{% if vehicle %}
 				<div class="container">	
 					<label for="city">City Name:</label>
 					<input disabled class="form-control" type="text" id="city" value="{{vehicle.city_name}}" name="">
