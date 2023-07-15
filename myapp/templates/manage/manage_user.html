@@ -14,8 +14,8 @@
 			{% endif %}
 			<ul class="list-group list-group-flush">
 			{% for indiv in users %}
-				<li class="list-group-item">
-					<a href="{% url 'update-user' indiv.id %}">{{indiv}}</a>
+				<li class="card">
+					<a href="{% url 'update-user' indiv.id %}">{{indiv}}		|			{{indiv.role}}</a>
 				</li>
 			{% endfor %}
 			</ul>

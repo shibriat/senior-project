@@ -1,20 +1,19 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-
-from .models import UserProfile, registered_vehicle_owner_table, vehicle_license_plate_registration_table, FelonyList, IncidentVehicular
+from .models import *
 from django import forms
 from django.forms import ModelForm
-
 
 class CreateUserForm(UserCreationForm):
 	class Meta:
 		model = User
-		fields = ('username', 'email', 'is_staff', 'password1', 'password2')
+		fields = ('username', 'email', 'role', 'is_staff', 'password1', 'password2')
 
 		labels = {
 			'username': '',
 			'email': '',
+			'role': '',
 			'password1': '',
 			'password2': '',
 		}
@@ -34,6 +33,10 @@ class CreateUserForm(UserCreationForm):
 
 				}
 				),
+			'role': forms.Select(attrs={
+				'class': 'form-control',
+				'Placeholder': 'Role',
+				}),
 			'password1': forms.PasswordInput(attrs={
 				'class': 'form-control',
 				'Placeholder': 'Password',
@@ -53,35 +56,9 @@ class CreateUserForm(UserCreationForm):
 		self.fields['password2'].widget.attrs['class'] = 'form-control'
 		self.fields['password2'].widget.attrs['placeholder'] = 'Confirm Password'
 
-class UserProfileForm(ModelForm):
-	class Meta:
-		model = UserProfile
-		fields = '__all__'
-
-		labels = {
-			'user': 'Username',
-			'role': 'User Role',
-			'designation': '',
-		}
-
-		widgets = {
-			'user': forms.Select(attrs={
-					'class': 'form-control',
-					'placeholder': 'USER',
-				}),
-			'role': forms.Select(attrs={
-					'class': 'form-control',
-					'placeholder': 'ROLE',
-				}),
-			'designation': forms.TextInput(attrs={
-					'class': 'form-control',
-					'placeholder': 'DESIGNATION',
-				}),
-		}
-
 class VehicleOwnerForm(ModelForm):
 	class Meta:
-		model = registered_vehicle_owner_table
+		model = RegisteredVehicleOwner
 		fields = (	'registered_vehicle_owner',
 					'registered_owner_email',
 					'registered_owner_address',
@@ -119,7 +96,7 @@ class VehicleOwnerForm(ModelForm):
 
 class VehicleRegistrationForm(ModelForm):
 	class Meta:
-		model = vehicle_license_plate_registration_table
+		model = RegisteredVehicle
 		fields = (	'city_name',
 					'vehicle_classification',
 					'vin',

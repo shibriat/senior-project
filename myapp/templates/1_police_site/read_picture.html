@@ -49,9 +49,9 @@
 					<label for="ownerid">Registered Vehicle Owner ID:</label>
 					<input disabled class="form-control" type="text" id="ownerid" value="{{vehicle.registered_owner_id.registered_owner_id}}" name="">
 					<br>
-					<a class="btn btn-success" href="{% url 'display-owner' vehicle.registered_owner_id.registered_owner_id %}">View Details of {{vehicle.registered_owner_id.registered_vehicle_owner}}</a>
+					<a class="btn btn-success mt-1" href="{% url 'display-owner' vehicle.registered_owner_id.registered_owner_id %}">View Details of {{vehicle.registered_owner_id.registered_vehicle_owner}}</a>
 					
-					<a class='btn btn-danger' href="{% url 'register-incident' vehicle.vin %}">Register Incident for {{ vehicle.registered_owner_id.registered_vehicle_owner }}</a>
+					<a class="btn btn-danger mt-1" href="{% url 'register-incident' vehicle.vin %}">Register Incident for {{ vehicle.registered_owner_id.registered_vehicle_owner }}</a>
 					{% if felonys %}
 						<br><br>
 						<b>Case(s) on this Vehicle {{vehicle}}</b><br>

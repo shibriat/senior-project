@@ -10,20 +10,20 @@
 			</center>
 			{% if results or results_owner%}
 				{% for result in results %}
-					{% if role == 'BRTA_Staff' or role == 'Admin' %}
+					{% if user.role == 'BRTA_Staff' or user.role == 'Admin' %}
 						<a href="{% url 'update-vehicle' result.pk %}">{{result}}</a><br>
 						<hr>
-					{% elif role == 'Police' or role == 'Admin' %}
+					{% elif user.role == 'Police' or user.role == 'Admin' %}
 						<a href="{% url 'display-vehicle' result.pk %}">{{result}}</a><br>
 						<hr>
 					{% endif %}
 				{% endfor %}
 			
 				{% for resultowner in results_owner %}
-					{% if role == 'BRTA_Staff' or role == 'Admin' %}
+					{% if user.role == 'BRTA_Staff' or user.role == 'Admin' %}
 						<a href="{% url 'update-vehicle-owner' resultowner.pk %}"> {{ resultowner }} </a>
 						<hr>
-					{% elif role == 'Police' or role == 'Admin' %}
+					{% elif user.role == 'Police' or user.role == 'Admin' %}
 						<a href="{% url 'display-owner' resultowner.pk %}"> {{ resultowner }} </a>
 						<hr>
 					{% endif %}

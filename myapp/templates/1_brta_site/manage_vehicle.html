@@ -14,7 +14,7 @@
 		<center><h4>Vehicle Details and Registration</h4></center>
 		<form action="" method="POST"> {% csrf_token %}
 			{{form.as_table}}
-			{% if role != 'Police' %}
+			{% if user.role != 'Police' %}
 				<input class="btn btn-warning" type="submit" value="Update" name="">
 				<a href="{% url 'delete-vehicle' vin %}" class='btn btn-danger'>Delete</a>
 			{% endif %}<br><br>

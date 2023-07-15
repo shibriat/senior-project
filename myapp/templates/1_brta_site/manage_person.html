@@ -17,12 +17,11 @@
 			<label for="ID"> Registered Owner ID: </label>
 			<input id="ID" class="form-control" type="text" value="{{indiv.registered_owner_id}}" disabled>
 			<br>
-			{% if role != 'Police' %}
-				<input class="btn btn-warning" type="submit" value="Update" name="">
-				<a href="{% url 'delete-vehicle-owner' owner_id %}" class='btn btn-danger'>Delete</a>
-				<a class="btn btn-success" href="{% url 'details' indiv.registered_owner_id %}">PDF Detailed Report on {{indiv.registered_vehicle_owner}}</a>
-				<a class="btn btn-success" href="">Print Detailed Report on {{indiv.registered_vehicle_owner}}</a>
-				<a class='btn btn-primary' href="{% url 'register-vehicle' indiv.pk %}">Register a New Vehicle for {{ indiv.registered_vehicle_owner }}</a>
+			{% if user.role != 'Police' %}
+				<input class="btn btn-warning mt-1" type="submit" value="Update" name="">
+				<a href="{% url 'delete-vehicle-owner' owner_id %}" class='btn btn-danger mt-1'>Delete</a>
+				<a class="btn btn-success mt-1" href="{% url 'details' indiv.registered_owner_id %}">Print Detailed Report on {{indiv.registered_vehicle_owner}}</a>
+				<a class='btn btn-primary mt-1' href="{% url 'register-vehicle' indiv.pk %}">Register a New Vehicle for {{ indiv.registered_vehicle_owner }}</a>
 				
 			{% endif %}
 		</form>

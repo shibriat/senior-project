@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LPDS | HOME</title>
+  <title>LPRTS | {% block title %}HOME{% endblock title %}</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -72,7 +72,7 @@
     <!-- Brand Logo -->
     <a href="{% url 'home' %}" class="brand-link">
       {% comment %} <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8"> {% endcomment %}
-      <span class="brand-text font-weight-light">LPDS</span>
+      <span class="brand-text font-weight-light">LPRS</span>
     </a>
 
     <!-- Sidebar -->
@@ -90,15 +90,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          {% if role == 'Police' or role == 'Admin' %}
-          <li class="nav-item">
-            <a href="{% url 'home' %}" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Dashboard
-              </p>
-            </a>
-          </li>
+          {% if user.role == 'Police' or user.role == 'Admin' %}
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-video"></i>
@@ -129,7 +121,7 @@
             </ul>
           </li>
 		        {% endif %}
-            {% if role == 'BRTA_Staff' or role == 'Admin' %}
+            {% if user.role == 'BRTA_Staff' or user.role == 'Admin' %}
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-server"></i>
@@ -154,7 +146,7 @@
               </ul>
             </li>
 			      {% endif %}
-            {% if role == 'Admin' %}
+            {% if user.role == 'Admin' %}
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-microchip"></i>
@@ -215,10 +207,10 @@
   <footer class="main-footer">
     <!-- To the right -->
     <div class="float-right d-none d-sm-inline">
-      LPSD
+      LPRS
     </div>
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2023</strong> All rights reserved.
   </footer>
 </div>
 <!-- ./wrapper -->

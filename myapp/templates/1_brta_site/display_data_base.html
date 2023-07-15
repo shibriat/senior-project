@@ -19,13 +19,13 @@
 				<div class="col-sm"><br><br>
 					<h5>Registered Owners</h5>
 					{% for indiv in indivs %}
-						<a class="form-control" href="{% url 'update-vehicle-owner' indiv.pk %}">{{ indiv.registered_vehicle_owner }} | {{ indiv.registered_owner_id }}</a>
+						<a class="card" href="{% url 'update-vehicle-owner' indiv.pk %}">{{ indiv.registered_vehicle_owner }} | {{ indiv.registered_owner_id }}</a>
 					{% endfor %}
 				</div>
 			    <div class="col-sm"><br><br>
 			    	<h5>Registered Vehicles</h5>
 			    	{% for vin in vins %}
-						<a class='form-control' href="{% url 'update-vehicle' vin.pk %}"> {{ vin }} </a>
+						<a class='card' href="{% url 'update-vehicle' vin.pk %}"> {{ vin }} </a>
 					{% endfor %}
 			    </div>
 			</div>			 

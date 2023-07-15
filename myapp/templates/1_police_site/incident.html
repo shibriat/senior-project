@@ -25,8 +25,8 @@
 		{% endfor %}
 		</ul>
 
-		<label for='fine'><b>Total Ammount of Fine(BDT):</b></label>
-		<input disabled id="fine" type="text" value="{{total_ammount}}" class="form-control">
+		<label for='fine'><b>Total Amount of Fine(BDT):</b></label>
+		<input disabled id="fine" type="text" value="{{total_amount}}" class="form-control">
 
 		<label for='oi'><b>Registered Vehicle Owner:</b></label>
 		<input disabled id="oi" type="text" value="{{report.registered_owner_id.registered_vehicle_owner}}" class="form-control">
@@ -43,7 +43,7 @@
 		<label for='sb'><b>Submitted By:</b></label>
 		<input disabled id="sb" type="text" value="{{report.submitted_by}}" class="form-control">
 		
-		<a class="btn btn-danger" href="{% url 'generate-incident' report.incident_id %}">Print Report</a>
-		<a class="btn btn-success" href="{% url 'generate-bill' report.incident_id %}">Print Bill</a>
+		<a class="btn btn-danger mt-1" href="{% url 'generate-incident' report.incident_id %}">Print Report</a>
+		<a class="btn btn-success mt-1" href="{% url 'generate-bill' report.incident_id %}">Print Bill</a>
 	</div>
 {% endblock content %}

@@ -3,8 +3,8 @@ from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import CreateUserForm, UserProfileForm, VehicleOwnerForm, VehicleRegistrationForm, IncidentForm
-from .models import UserProfile, registered_vehicle_owner_table, vehicle_license_plate_registration_table, IncidentVehicular
+from .forms import *
+from .models import *
 
 
 from django.core.files.storage import default_storage
@@ -36,19 +36,7 @@ import os
 import tempfile
 
 
-def checkuserrole(request):
-    profile = UserProfile.objects.filter(user__pk=request.user.id)
-    if profile[0].role == 'Admin':
-        return profile[0].role
-    if profile[0].role == 'BRTA_Staff':
-        return profile[0].role
 
-    if profile[0].role == 'Police':
-        return profile[0].role
-    else:
-        return redirect('login')
-
-# Function to extract VIN from Image
 def get_vin(frame):
 
     # Defining dictionary to translate bangla numbers to english number
@@ -66,7 +54,7 @@ def get_vin(frame):
     }
 
     
-    # Transformimg Image from colored to Gray
+
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Preprocess the image to highlight the text regions
@@ -77,12 +65,11 @@ def get_vin(frame):
     # Detect the location of the text regions
     # boxes = pytesseract.image_to_boxes(gray, lang='ben', config='--oem 3 --psm 3')
     
-    # Extracting strings from image Language = lang='ben' and config
+    # Extracting all the Text From the Image Frame as Bangla and Parse it to the String
     results = pytesseract.image_to_string(gray, lang='ben', config='--psm 3')
     
     print(results)
-	
-    # Filtering the Unwanted Characters from vin number string
+    # Using RegEX to filter Bangla Integer Number and store in texts as string
     texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
     vins = ""
     for text in texts:
@@ -91,17 +78,20 @@ def get_vin(frame):
     del texts
     vin = ""
     for text in vins:
+        # Using Dictionary "dic" convert the Bangla Number to English Integer Number
         vin = vin + str(dic[text])
     del vins
-    # If length of vin is equal to six then return the vin (CORECT)
+
+    # Checking if the length of processed vin is equals to 6
     if len(vin) == 6:
+        # Return the vin Number
         return str(vin)
+    # If the length of processed vin is not equals to 6 the do the steps all over again
     else:
-	# Extracting strings from image Language = lang='ben' and config
         results = pytesseract.image_to_string(gray, lang='ben', config='--psm 6')
         print(results)
 
-       	# Filtering the Unwanted Characters from vin number string 
+        
         texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
         
         vins = ""
@@ -113,16 +103,16 @@ def get_vin(frame):
         for text in vins:
             vin = vin + str(dic[text])
         del vins
-	# If length of vin is equal to six then return the vin (CORECT)
+
         if len(vin) == 6:
             return str(vin)
 
-# Mail the notification to the users
+# Function of SMTP Mail the notification to the users
 def sendmail(request, subject, message, email_receiver):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
-            email_sender = 'smarifmahmud9@gmail.com'
-            email_password = 'nvchliisoaxrqorw'
+        if request.user.role == 'Police' or request.user.role == 'Admin' or request.user.role == 'BRTA_Staff':
+            email_sender = 'licenseplatetrackingsystem@gmail.com'
+            email_password = 'sbwnzxhohxrwfkae'
 
             body = f"""
 			{message}
@@ -166,119 +156,123 @@ def login_user(request):
 
 
 def logout_user(request):
+    # Logging Out of the Session
     logout(request)
     return redirect('login')
 
 
 def display_home_page(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Admin':
-            return render(request, 'home/home.html', {'role': checkuserrole(request)})
-
-        if checkuserrole(request) == 'BRTA_Staff':
-            return render(request, 'home/home.html', {'role': checkuserrole(request)})
-
-        if checkuserrole(request) == 'Police':
-            return render(request, 'home/home.html', {'role': checkuserrole(request)})
+        # Rendering the Home Page
+        return render(request, 'home/home.html', {})
     else:
         return redirect('login')
 
 
 def register_user(request):
-	if request.user.is_authenticated:
-		if checkuserrole(request) == 'Admin':
-			form = CreateUserForm()
-			errormsg = None
-			if request.method == "POST":
-				form = CreateUserForm(request.POST)
-				if form.is_valid():
-					form.save()
-					messages.add_message(request, messages.SUCCESS, 'User Registered Successfully')
-				else:
-					errormsg = 'Error'
-			
-			return render(request, 'register/register.html', {
-				'form': form,
-				'errormsg' : errormsg,
-				'role': checkuserrole(request),
-				})
-		else:
-			return redirect('home')
-
-
-def manage_user(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Admin':
-            users = User.objects.all()
-            return render(request, 'manage/manage_user.html', {'users': users, 'role': checkuserrole(request), })
-        else:
-            return redirect('home')
+        # If the logged in user is an admin
+        if request.user.role == 'Admin':
+            # Storing the Create User Form in to "form"
+            form = CreateUserForm()
+            if request.method == "POST":
+                # Populating the "form" with the Data acquired from Html form from frontend
+                form = CreateUserForm(request.POST)
+                # Checking if the Form is valid
+                if form.is_valid():
+                    # Saving the object into the database after verifying the data
+                    form.save()
+                    # Showing Success popup message in the screen
+                    messages.add_message(
+                        request, messages.SUCCESS, 'User Registered Successfully')
+                    try:
+                        # Sending mail to the newly registered user with the login credentials
+                        sendmail(request, f"User Profile Creation of {request.POST['username']}", f"""
+Dear {request.POST['username']},
+Your Account Registered Successfully as {request.POST['role']}
+Your Updated Credentials:
+USERNAME: {request.POST['username']}
+PASSWORD: {request.POST['password2']}
 
-    else:
-        return redirect('login')
+Regards
+License Plate Recognition and Tracking System
+""", request.POST['email'])
+                    except:
+                        pass
+                # If the form is not valid
+                else:
+                    # Show Error popup message in the screen
+                    messages.add_message(request, messages.INFO, 'Error')
 
-
-def manage_user_role(request, userid):
-    if request.user.is_authenticated:
-        if checkuserrole(request) == 'Admin':
-            data = UserProfile.objects.filter(user__pk=userid)
-            form = UserProfileForm(request.POST or None, instance=data[0])
-            if form.is_valid():
-                instances = form.save()
-                messages.add_message(
-                    request, messages.SUCCESS, 'User Role Updated')
-                user = User.objects.get(pk=userid)
-
-                sendmail(request, 'User Role Update', f"""
-					Dear {user.username},
-					your role has been updated to {instances.role},
-
-					Regards
-					{request.user}""", user.email)
-            return render(request, 'manage/manage_user_role.html', {'data': data,
-                                                                    'form': form,
-                                                                    'role': checkuserrole(request),
-                                                                    })
-        else:
-            return redirect('home')
-    else:
-        return redirect('login')
-
-
-def update_user(request, user_id):
-    if request.user.is_authenticated:
-        if checkuserrole(request) == 'Admin':
-            USER = User.objects.get(pk=user_id)
-            form = CreateUserForm(request.POST or None, instance=USER)
-            if form.is_valid():
-                instances = form.save()
-                messages.add_message(
-                    request, messages.SUCCESS, 'User Information Updated in the Database')
-
-                sendmail(request, f'User Profile Update of {USER.username}', f"""
-					Dear {request.POST['username']},
-					Your Updated Credentials:
-					USERNAME: {request.POST['username']}
-					PASSWORD: {request.POST['password2']}
-					""", request.POST['email'])
-            return render(request, 'manage/update_user.html', {
+            return render(request, 'register/register.html', {
                 'form': form,
-                'userid': user_id,
-                'role': checkuserrole(request),
             })
         else:
             return redirect('home')
 
     else:
         return redirect('login')
+# Display and Manage all Users Function
+def manage_user(request):
+    if request.user.is_authenticated:
+        if request.user.role == 'Admin':
+            # Show all the active Users in the System from the Customized "User" Model Table from the Database
+            return render(request, 'manage/manage_user.html', {'users': User.objects.all(), })
+        else:
+            return redirect('home')
+    else:
+        return redirect('login')
+# Update a Single and Specific user from the database Function
+def update_user(request, user_id):
+    if request.user.is_authenticated:
+        # Check If the Logged in User is an Admin
+        if request.user.role == 'Admin':
+            # Get that Specific User using the "user_id"
+            try:
+                USER = User.objects.get(pk=user_id)
+            except:
+                return redirect('home')
+            # Populate the Form with the User instance from the "user_id"
+            form = CreateUserForm(request.POST or None, instance=USER)
+            # Checking If the form updated is valid
+            if form.is_valid():
+                # Saving the updated user object into the User Model in the Database
+                form.save()
+                # Success message in the screen
+                messages.add_message(
+                    request, messages.SUCCESS, 'User Information Updated in the Database')
+                # Sending updated credentials to the User by Email
+                try:
+                    sendmail(request, f'User Profile Update of {USER.username}', f"""
+Dear {request.POST['username']},
+Your Updated Credentials as {request.POST['role']}:
+USERNAME: {request.POST['username']}
+PASSWORD: {request.POST['password2']}
 
+Regards
+License Plate Recognition and Tracking System
+""", request.POST['email'])
+                except:
+                    pass
+            return render(request, 'manage/update_user.html', {
+                'form': form,
+                'userid': user_id,
+            })
+        else:
+            return redirect('home')
 
+    else:
+        return redirect('login')
+# Function of Delete System user from the Database
 def delete_user(request, user_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Admin':
+        if request.user.role == 'Admin':
+            # Get the particular user object using the "user_id"
             USER = User.objects.get(pk=user_id)
             if USER:
+                # deleting the user object from the User Model in the Database
                 USER.delete()
+                # Success message
                 messages.add_message(
                     request, messages.SUCCESS, 'User Removed From the Database')
                 return redirect('manage-user')
@@ -291,24 +285,32 @@ def delete_user(request, user_id):
 
 
 ########################################################### BRTA OPERATIONS ###########################################################
-
+# Function of Registering Vehicle Owner into the RegisteredVehicleOwner Model in the Database
 def register_owner(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
+        # Checking If the logged in user is "BRTA_Staff" or "Admin"
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
+            # Getting the from for the Model
             form = VehicleOwnerForm()
+            # If the User submit the form as post method from the HTML
             if request.method == 'POST':
+                # Populate the form of the VehicleOwner with the obtained data
                 form = VehicleOwnerForm(request.POST)
+                # Checking If the form updated is valid
                 if form.is_valid():
+                    # Saving the Object in the "RegisteredVehicleOwner" Model in the Database
                     form.save()
+                    # Success popup message in the screen
                     messages.add_message(
                         request, messages.SUCCESS, 'Owner Registered in the Database')
+                    # Sending Email notification of the Successful Registration into the System to the Registered Person
                     try:
                         sendmail(request, f"Vehicle Owner Registration of {request.POST['registered_vehicle_owner']}", f"""
-						Dear {request.POST['registered_vehicle_owner']},
-						Your profile has been Successfully registered into the System
+Dear {request.POST['registered_vehicle_owner']},
+Your profile has been Successfully registered into the System
 
-						Regards,
-						License Plate Tracking System
+Regards,
+License Plate Recognition and Tracking System
 						""", request.POST['registered_owner_email'])
                     except:
                         pass
@@ -316,117 +318,106 @@ def register_owner(request):
                 else:
                     messages.add_message(
                         request, messages.INFO, 'Encoutered Error while Registering Owner')
-            return render(request, '1_brta_site/register_owner.html', {'form': form,
-                                                                       'role': checkuserrole(request), })
+            return render(request, '1_brta_site/register_owner.html', {'form': form, })
         else:
             return redirect('home')
     else:
         return redirect('login')
-
-
+# Function of Vehicle Registration to a specific person using "owner_id"
 def register_vehicle(request, owner_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
+        # Checking If the logged in user is "BRTA_Staff" or "Admin"
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
+            # Getting form of RegisteredVehicle Model from the Database
             form = VehicleRegistrationForm()
-            indivs = registered_vehicle_owner_table.objects.get(pk=owner_id)
+            # Getting that specific Vehicle Owner object using "owner_id"
+            indivs = RegisteredVehicleOwner.objects.get(pk=owner_id)
+            # If the user submitted the form using POST method in the Frontend
             if request.method == 'POST':
                 form = VehicleRegistrationForm(request.POST)
+                # If the populated form of RegisteredVehicle Model is valid
                 if form.is_valid():
+                    # Save the Object in the RegisteredVehicle Model in the Database
                     form.save()
+                    # Success message to the web screen
                     messages.add_message(
                         request, messages.SUCCESS, 'Registered a vehicle on The Following Owner')
-
+                    # Sending Email notification message of the Successful vehicle Registration into the System to the Vehicle owner
                     try:
                         sendmail(request, f"Successfully Registered Vehicle, VIN: {request.POST['vin']} to {indivs.registered_vehicle_owner}", f"""
-						Congratilations {indivs.registered_vehicle_owner},
-						The vehicle with following Cedentials and Identifications
-						City name: {request.POST['city_name']}, Classification: {request.POST['vehicle_classification']}, VIN: {request.POST['vin']}
-						Model: {request.POST['vehicle_brand']}, Engine CC: {request.POST['engine_cc']}
-						Has successfully been registered to "{indivs.registered_vehicle_owner}"
+Congratulations {indivs.registered_vehicle_owner},
+The vehicle with following Cedentials and Identifications
+City name: {request.POST['city_name']}, Classification: {request.POST['vehicle_classification']}, VIN: {request.POST['vin']}
+Model: {request.POST['vehicle_brand']}, Engine CC: {request.POST['engine_cc']}
+Has successfully been registered to "{indivs.registered_vehicle_owner}"
 
-						Regards,
-						License Plate Tracking System
-						""", indivs.registered_owner_email)
+Regards,
+License Plate Recognition and Tracking System
+""", indivs.registered_owner_email)
                     except:
                         pass
 
                     return redirect('display-database')
-            return render(request, '1_brta_site/register_vehicle.html', {'form': form, 'indivs': indivs, 'role': checkuserrole(request), })
+            return render(request, '1_brta_site/register_vehicle.html', {'form': form, 'indivs': indivs, })
         else:
             return redirect('home')
     else:
         return redirect('login')
-
-
+# Function of displaying the all list of RegisteredVehicle and RegisteredVehicleOwner
 def display_database(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
-            indivs = registered_vehicle_owner_table.objects.all()
-            vins = vehicle_license_plate_registration_table.objects.all()
-
-            ownerForm = VehicleOwnerForm()
-            vehicleForm = VehicleRegistrationForm()
-            if request.method == 'POST':
-                ownerForm = VehicleOwnerForm(request.POST)
-                vehicleForm = VehicleRegistrationForm(request.POST)
-                if ownerForm.is_valid() & vehicleForm.is_valid():
-                    ownerForm.save()
-                    vehicleForm.save()
-                    messages.add_message(
-                        request, messages.SUCCESS, 'Data Stored')
-                    return redirect('display-database')
-                else:
-                    messages.add_message(
-                        request, messages.INFO, 'Error Found While Storing Data')
-                    return redirect('display-database')
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
             return render(request, '1_brta_site/display_data_base.html', {
-                'indivs': indivs,
-                'vins': vins,
-                'ownerForm': ownerForm,
-                'vehicleForm': vehicleForm,
-                'role': checkuserrole(request),
+                # getting all the Objects into the Frontend
+                'indivs': RegisteredVehicleOwner.objects.all(),
+                'vins': RegisteredVehicle.objects.all(),
             })
         else:
             return redirect('home')
     else:
         return redirect('login')
 
-# UPDATE AND DELETE VEHICLE OWNER
-
-
+# FUNCTION OF UPDATE VEHICLE OWNER
 def update_owner(request, owner_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
-            vehicle = vehicle_license_plate_registration_table.objects.filter(
-                registered_owner_id__pk=owner_id)
-            indiv = registered_vehicle_owner_table.objects.get(pk=owner_id)
-            form = VehicleOwnerForm(request.POST or None, instance=indiv)
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
+     
+            form = VehicleOwnerForm(request.POST or None, instance=RegisteredVehicleOwner.objects.get(pk=owner_id))
             if form.is_valid():
+                # Saving the model into the database
                 form.save()
+                # Success message to the web screen
                 messages.add_message(
                     request, messages.SUCCESS, 'Vehicle Owner Information Updated in the Database')
+                # Sending Email notification of Updating the person's credentials Successfully into the System to the Registered Person
                 try:
                     sendmail(request, f"Successfully Updated Registered Owner {request.POST['registered_vehicle_owner']}'s Profile", f"""
 					Dear {request.POST['registered_vehicle_owner']},
-					Your Credentials has been updated
+Your Credentials has been updated
 
-					Regards,
-					License Plate Tracking System
-					""", request.POST['registered_owner_email'])
+Regards,
+License Plate Recognition and Tracking System
+""", request.POST['registered_owner_email'])
                 except:
                     pass
-            return render(request, '1_brta_site/manage_person.html', {'form': form, 'owner_id': owner_id, 'indiv': indiv, 'vehicle': vehicle, 'role': checkuserrole(request), })
+            return render(request, '1_brta_site/manage_person.html', {  'form': form, 
+                                                                        'owner_id': owner_id, 
+                                                                        'indiv': RegisteredVehicleOwner.objects.get(pk=owner_id), 
+                                                                        'vehicle': RegisteredVehicle.objects.filter(registered_owner_id__pk=owner_id), 
+                                                                        }
+            )
         else:
             return redirect('home')
     else:
         return redirect('login')
-
-
+# Function of Deleting RegisteredVehicleOwner Object by Primary Key from the database
 def delete_owner(request, owner_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
-            indiv = registered_vehicle_owner_table.objects.get(pk=owner_id)
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
+            # Getting RegisteredVehicleOwner Object by Primary Key
+            indiv = RegisteredVehicleOwner.objects.get(pk=owner_id)
             if indiv:
+                # Deleting the RegisteredVehicleOwner Object
                 indiv.delete()
                 return redirect('display-database')
             else:
@@ -435,16 +426,11 @@ def delete_owner(request, owner_id):
             return redirect('home')
     else:
         return redirect('login')
-
-###
-
-# UPDATE AND DELETE VEHICLE
-
-
+# FUNCTION OF UPDATING A SPECIFIC VEHICLE IN THE DATABASE USING PRIMARY KEY "VIN"
 def update_vehicle(request, vin):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
-            vehicle = vehicle_license_plate_registration_table.objects.get(
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
+            vehicle = RegisteredVehicle.objects.get(
                 pk=vin)
             form = VehicleRegistrationForm(
                 request.POST or None, instance=vehicle)
@@ -455,17 +441,17 @@ def update_vehicle(request, vin):
                 try:
                     sendmail(request, f"Details of Vehicle {request.POST['vin']} has been Updated",
                              f"""
-					Dear {registered_vehicle_owner_table.objects.get(pk=vehicle.registered_owner_id.registered_owner_id).registered_vehicle_owner},
-					Your details of the vehicle with following information City name: {request.POST['city_name']}, Classification: {request.POST['vehicle_classification']}, VIN: {request.POST['vin']}
-					Model: {request.POST['vehicle_brand']}, Engine CC: {request.POST['engine_cc']}
-					has been updated
+Dear {RegisteredVehicleOwner.objects.get(pk=vehicle.registered_owner_id.registered_owner_id).registered_vehicle_owner},
+Your details of the vehicle with following information City name: {request.POST['city_name']}, Classification: {request.POST['vehicle_classification']}, VIN: {request.POST['vin']}
+Model: {request.POST['vehicle_brand']}, Engine CC: {request.POST['engine_cc']}
+has been updated
 
-					Regards,
-					License Plate Tracking System
-					""", registered_vehicle_owner_table.objects.get(pk=vehicle.registered_owner_id.registered_owner_id).registered_owner_email)
+Regards,
+License Plate Recognition and Tracking System
+""", RegisteredVehicleOwner.objects.get(pk=vehicle.registered_owner_id.registered_owner_id).registered_owner_email)
                 except:
                     pass
-            return render(request, '1_brta_site/manage_vehicle.html', {'form': form, 'vin': vin, 'vehicle': vehicle, 'role': checkuserrole(request), })
+            return render(request, '1_brta_site/manage_vehicle.html', {'form': form, 'vin': vin, 'vehicle': vehicle, })
         else:
             return redirect('home')
     else:
@@ -474,8 +460,8 @@ def update_vehicle(request, vin):
 
 def delete_vehicle(request, vin):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
-            vehicle = vehicle_license_plate_registration_table.objects.get(
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
+            vehicle = RegisteredVehicle.objects.get(
                 pk=vin)
             if vehicle:
                 vehicle.delete()
@@ -492,7 +478,7 @@ def delete_vehicle(request, vin):
 
 def generate_owner_details(request, owner_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'BRTA_Staff' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
             # Create Bytestream Buffer
             buffer = io.BytesIO()
             canv = canvas.Canvas(buffer, pagesize=A4, bottomup=0)
@@ -502,7 +488,7 @@ def generate_owner_details(request, owner_id):
             textobj.setFont('Times-Roman', 10)
 
             # Get object of that owner id
-            owner = registered_vehicle_owner_table.objects.get(pk=owner_id)
+            owner = RegisteredVehicleOwner.objects.get(pk=owner_id)
             # Create Empty List of lines
             lines = []
             # Append the data in the list of lines
@@ -530,7 +516,7 @@ def generate_owner_details(request, owner_id):
             lines.append(
                 '_________________________________________________________________________________________')
 
-            vehicles = vehicle_license_plate_registration_table.objects.filter(
+            vehicles = RegisteredVehicle.objects.filter(
                 registered_owner_id__pk=owner_id)
 
             if vehicles:
@@ -576,19 +562,19 @@ def search_item(request):
     if request.user.is_authenticated:
         if request.method == "POST":
             searched = request.POST['searched']
-            results_vehicle = vehicle_license_plate_registration_table.objects.filter(
+            results_vehicle = RegisteredVehicle.objects.filter(
                 Q(vin__contains=searched) |
                 Q(city_name__contains=searched) |
                 Q(vehicle_classification__contains=searched) |
                 Q(vehicle_brand__contains=searched)
             )
 
-            results_owner = registered_vehicle_owner_table.objects.filter(
+            results_owner = RegisteredVehicleOwner.objects.filter(
                 Q(registered_owner_id__contains=searched) |
                 Q(registered_vehicle_owner__contains=searched)
             )
 
-            return render(request, 'searched/searched.html', {'searched': searched, 'results': results_vehicle, 'results_owner': results_owner, 'role': checkuserrole(request), })
+            return render(request, 'searched/searched.html', {'searched': searched, 'results': results_vehicle, 'results_owner': results_owner, })
         else:
             return redirect('home')
     else:
@@ -599,7 +585,7 @@ def search_item(request):
 
 def checkplate_realtime(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             if request.method == 'POST':
                 frame_data = request.POST['frame_data']
                 video_frame = ''
@@ -610,19 +596,18 @@ def checkplate_realtime(request):
                         base64.b64decode(frame_data), np.uint8)
                     # Convert numpy array to video frame
                     video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-		# Function defined at Line number 51
                 vin = get_vin(video_frame)
                 print(vin)
                 try:
-                    vehicle = vehicle_license_plate_registration_table.objects.get(pk=vin)
+                    vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
                 except:
                     print('\ntouched null part\n')
                     vehicle = None
                     felonys = None
                 
-                return render(request, '1_police_site/check_realtime.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, 'role': checkuserrole(request), })
-            return render(request, '1_police_site/check_realtime.html', {'role': checkuserrole(request), })
+                return render(request, '1_police_site/check_realtime.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, })
+            return render(request, '1_police_site/check_realtime.html', {})
         else:
             return redirect('home')
     else:
@@ -631,36 +616,23 @@ def checkplate_realtime(request):
 
 def checkplate_picture(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             if request.method == 'POST':
+                image = request.FILES.get('image')
+                # Convert the bytes to a NumPy array
+                image_bytes = image.read()
+                image_array = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), -1)
+                vin = get_vin(image_array)
+                print('\nvin:', vin)
                 try:
-                    image = request.FILES.get('image')
-                    # Convert the bytes to a NumPy array
-                    image_bytes = image.read()
-                    image_array = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), -1)
-		    # Function defined at Line number 51
-                    vin = get_vin(image_array)
-                    print('\nvin:', vin)
-                    try:
-                        vehicle = vehicle_license_plate_registration_table.objects.get(
-                            pk=vin)
-                        felonys = IncidentVehicular.objects.filter(vin__pk=vin)
-                    except:
-                        vehicle = None
-                        felonys = None
-
-                    return render(request, '1_police_site/read_picture.html', {'vin': vin,
-                                                                               'vehicle': vehicle,
-                                                                               'felonys': felonys,
-                                                                               'role': checkuserrole(request), })
+                    vehicle = RegisteredVehicle.objects.get(pk=vin)
+                    felonys = IncidentVehicular.objects.filter(vin__pk=vin)
                 except:
-                    try:
-                        print('touched\n')
-                        return render(request, '1_police_site/read_picture.html', {'vin': vin,
-                                                                                   'role': checkuserrole(request), })
-                    except:
-                        pass
-            return render(request, '1_police_site/read_picture.html', {'role': checkuserrole(request), })
+                    vehicle = None
+                    felonys = None
+
+                return render(request, '1_police_site/read_picture.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, })
+            return render(request, '1_police_site/read_picture.html', {})
         else:
             return redirect('home')
     else:
@@ -669,7 +641,7 @@ def checkplate_picture(request):
 
 def register_incident(request, vin):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             form = IncidentForm()
             if request.method == 'POST':
                 form = IncidentForm(request.POST)
@@ -677,7 +649,7 @@ def register_incident(request, vin):
                     instance = form.save()
                     messages.add_message(
                         request, messages.SUCCESS, 'Incident Registered Successfully')
-                    vehicle = vehicle_license_plate_registration_table.objects.get(
+                    vehicle = RegisteredVehicle.objects.get(
                         pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
 
@@ -689,30 +661,29 @@ def register_incident(request, vin):
                     try:
                         sendmail(request, f"Case ID:{instance.incident_id}",
                                  f"""
-						Dear {instance.registered_owner_id.registered_vehicle_owner},
-						You have been registered Case on following charge(s): {str(charge)} on Vehicle VIN: {instance.vin}
-						Pay the Fine on any branch of "Sonali Bank" by the due date to avoid Extra late Charge.
+Dear {instance.registered_owner_id.registered_vehicle_owner},
+You have been registered Case on following charge(s): {str(charge)} on Vehicle VIN: {instance.vin}
+Pay the Fine on any branch of "Sonali Bank" by the due date to avoid Extra late Charge.
 
-						============================================================================================================================
-						Case Title: {instance.incident_title}
-						Case ID: {instance.incident_id}
-						Committed Felony(ies): {charge}
-						Registered Vehicle Owner: {instance.registered_owner_id.registered_vehicle_owner}
-						Vehicle Identification Number: {instance.vin}
-						Case Registration Date: {instance.submition_date}
-						Case Registered By: {instance.submitted_by}
-						============================================================================================================================
+============================================================================================================================
+Case Title: {instance.incident_title}
+Case ID: {instance.incident_id}
+Committed Felony(ies): {charge}
+Registered Vehicle Owner: {instance.registered_owner_id.registered_vehicle_owner}
+Vehicle Identification Number: {instance.vin}
+Case Registration Date: {instance.submition_date}
+Case Registered By: {instance.submitted_by}
+============================================================================================================================
 
-						Regards,
-						License Plate Tracking System
-						""", instance.registered_owner_id.registered_owner_email)
+Regards,
+License Plate Recognition and Tracking System
+""", instance.registered_owner_id.registered_owner_email)
                     except:
                         pass
-                    return render(request, '1_police_site/display_vehicle.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, 'role': checkuserrole(request), })
-            vehicle = vehicle_license_plate_registration_table.objects.get(
+                    return render(request, '1_police_site/display_vehicle.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, })
+            vehicle = RegisteredVehicle.objects.get(
                 pk=vin)
-            return render(request, '1_police_site/register_incident.html', {'role': checkuserrole(request),
-                                                                            'form': form,
+            return render(request, '1_police_site/register_incident.html', {'form': form,
                                                                             'vehicle': vehicle,
                                                                             })
         else:
@@ -723,10 +694,10 @@ def register_incident(request, vin):
 
 def run_vin(request):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             if request.method == 'POST':
                 try:
-                    vehicle = vehicle_license_plate_registration_table.objects.get(
+                    vehicle = RegisteredVehicle.objects.get(
                         pk=request.POST['searched'])
                     felonys = IncidentVehicular.objects.filter(
                         vin__pk=request.POST['searched'])
@@ -734,12 +705,11 @@ def run_vin(request):
                     vehicle = None
                     felonys = None
                     pass
-                return render(request, '1_police_site/run_vin.html', {'role': checkuserrole(request),
-                                                                      'search': request.POST['searched'],
+                return render(request, '1_police_site/run_vin.html', {'search': request.POST['searched'],
                                                                       'vehicle': vehicle,
                                                                       'felonys': felonys,
                                                                       })
-            return render(request, '1_police_site/run_vin.html', {'role': checkuserrole(request)})
+            return render(request, '1_police_site/run_vin.html', {})
         else:
             return redirect('home')
     else:
@@ -748,14 +718,14 @@ def run_vin(request):
 
 def display_owner(request, owner_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
-            vehicle = vehicle_license_plate_registration_table.objects.filter(
+        if request.user.role == 'Police' or request.user.role == 'Admin':
+            vehicle = RegisteredVehicle.objects.filter(
                 registered_owner_id__pk=owner_id)
-            indiv = registered_vehicle_owner_table.objects.get(pk=owner_id)
+            indiv = RegisteredVehicleOwner.objects.get(pk=owner_id)
             form = VehicleOwnerForm(request.POST or None, instance=indiv)
             felonys = IncidentVehicular.objects.filter(
                 registered_owner_id__pk=owner_id)
-            return render(request, '1_police_site/display_owner.html', {'form': form, 'owner_id': owner_id, 'felonys': felonys, 'indiv': indiv, 'vehicle': vehicle, 'role': checkuserrole(request), })
+            return render(request, '1_police_site/display_owner.html', {'form': form, 'owner_id': owner_id, 'felonys': felonys, 'indiv': indiv, 'vehicle': vehicle, })
         else:
             return redirect('home')
     else:
@@ -764,27 +734,26 @@ def display_owner(request, owner_id):
 
 def display_vehicle(request, vin):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin' or checkuserrole(request) == 'Police':
-            vehicle = vehicle_license_plate_registration_table.objects.get(
+        if request.user.role == 'Police' or request.user.role == 'Admin' or request.user.role == 'Police':
+            vehicle = RegisteredVehicle.objects.get(
                 pk=vin)
             felonys = IncidentVehicular.objects.filter(vin__pk=vin)
 
-            return render(request, '1_police_site/display_vehicle.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, 'role': checkuserrole(request), })
+            return render(request, '1_police_site/display_vehicle.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys,})
         else:
-            return render(request, 'home/home.html', {'role': checkuserrole(request), })
+            return render(request, 'home/home.html', {})
     else:
-        return render(request, 'login/login.html', {'role': checkuserrole(request), })
+        return render(request, 'login/login.html', {})
 
 
 def display_incident(request, incident_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             report = IncidentVehicular.objects.get(pk=incident_id)
-            total_ammout = 0
+            total_amount = 0
             for felony in report.felony.all():
-                total_ammout = total_ammout + int(felony.felony_charge)
-            return render(request, '1_police_site/incident.html', {'role': checkuserrole(request),
-                                                                   'total_ammount': total_ammout,
+                total_amount = total_amount + int(felony.felony_charge)
+            return render(request, '1_police_site/incident.html', {'total_amount': total_amount,
                                                                    'report': report})
         else:
             return redirect('home')
@@ -794,7 +763,7 @@ def display_incident(request, incident_id):
 
 def generate_incident(request, incident_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             # Create Bytestream Buffer
             buffer = io.BytesIO()
             canv = canvas.Canvas(buffer, pagesize=A4, bottomup=0)
@@ -857,7 +826,7 @@ def generate_incident(request, incident_id):
 
 def generate_bill(request, incident_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             # Create Bytestream Buffer
             buffer = io.BytesIO()
             canv = canvas.Canvas(buffer, pagesize=A4, bottomup=0)
@@ -898,10 +867,10 @@ def generate_bill(request, incident_id):
                 felFine = felFine + int(felony.felony_charge)
 
             lines.append('')
-            lines.append(f'Net Payable Ammount: {felFine} Taka')
+            lines.append(f'Net Payable Amount: {felFine} Taka')
             lines.append('')
             lines.append(
-                f'Please pay the Net Payable Ammount: {felFine} Taka to any branch of Sonali Bank')
+                f'Please pay the Net Payable Amount: {felFine} Taka to any branch of Sonali Bank')
             lines.append(
                 '_________________________________________________________________________________________')
             lines.append('')
@@ -932,10 +901,10 @@ def generate_bill(request, incident_id):
                 felFine = felFine + int(felony.felony_charge)
 
             lines.append('')
-            lines.append(f'Net Payable Ammount: {felFine} Taka')
+            lines.append(f'Net Payable Amount: {felFine} Taka')
             lines.append('')
             lines.append(
-                f'Please pay the Net Payable Ammount: {felFine} Taka to any branch of Sonali Bank')
+                f'Please pay the Net Payable Amount: {felFine} Taka to any branch of Sonali Bank')
 
             # Putting lines in text object
             for line in lines:
@@ -958,7 +927,7 @@ def generate_bill(request, incident_id):
 
 def generate_vehicle_owner_details(request, owner_id):
     if request.user.is_authenticated:
-        if checkuserrole(request) == 'Police' or checkuserrole(request) == 'Admin':
+        if request.user.role == 'Police' or request.user.role == 'Admin':
             # Create Bytestream Buffer
             buffer = io.BytesIO()
             canv = canvas.Canvas(buffer, pagesize=A4, bottomup=0)
@@ -968,7 +937,7 @@ def generate_vehicle_owner_details(request, owner_id):
             textobj.setFont('Times-Roman', 10)
 
             # Get object of that owner id
-            owner = registered_vehicle_owner_table.objects.get(pk=owner_id)
+            owner = RegisteredVehicleOwner.objects.get(pk=owner_id)
             # Create Empty List of lines
             lines = []
             # Append the data in the list of lines
@@ -996,7 +965,7 @@ def generate_vehicle_owner_details(request, owner_id):
             lines.append(
                 '_________________________________________________________________________________________')
 
-            vehicles = vehicle_license_plate_registration_table.objects.filter(
+            vehicles = RegisteredVehicle.objects.filter(
                 registered_owner_id__pk=owner_id)
 
             if vehicles:
