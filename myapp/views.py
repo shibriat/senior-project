@@ -38,7 +38,6 @@ import tempfile
 
 
 def get_vin(frame):
-
     # Defining dictionary to translate bangla numbers to english number
     dic = {
         '০': '0',
@@ -52,11 +51,8 @@ def get_vin(frame):
         '৮': '8',
         '৯': '9'
     }
-
-    
-
+    # Converting the Image frame from colored to Gray 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
     # Preprocess the image to highlight the text regions
     gray = cv2.medianBlur(gray, 5)
     gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
@@ -339,10 +335,10 @@ def register_vehicle(request, owner_id):
                 if form.is_valid():
                     # Save the Object in the RegisteredVehicle Model in the Database
                     form.save()
-                    # Success message to the web screen
+                    # Success message
                     messages.add_message(
                         request, messages.SUCCESS, 'Registered a vehicle on The Following Owner')
-                    # Sending Email notification message of the Successful vehicle Registration into the System to the Vehicle owner
+                    # Sending Email notification of the Successful vehicle Registration into the System to the Vehicle owner
                     try:
                         sendmail(request, f"Successfully Registered Vehicle, VIN: {request.POST['vin']} to {indivs.registered_vehicle_owner}", f"""
 Congratulations {indivs.registered_vehicle_owner},
@@ -384,9 +380,7 @@ def update_owner(request, owner_id):
      
             form = VehicleOwnerForm(request.POST or None, instance=RegisteredVehicleOwner.objects.get(pk=owner_id))
             if form.is_valid():
-                # Saving the model into the database
                 form.save()
-                # Success message to the web screen
                 messages.add_message(
                     request, messages.SUCCESS, 'Vehicle Owner Information Updated in the Database')
                 # Sending Email notification of Updating the person's credentials Successfully into the System to the Registered Person
