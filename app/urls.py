@@ -22,6 +22,6 @@ urlpatterns = [
     path('', include('myapp.urls')),
 ]
 
-admin.site.site_header  =  "Admin Vehicle Licence Plate Registration System"  
-admin.site.site_title  =  "Admin Vehicle Licence Plate Registration System"
+admin.site.site_header  =  "Admin Vehicle License Plate Recognition and Tracking System"  
+admin.site.site_title  =  "Admin Vehicle License Plate Recognition and Tracking System"
 admin.site.index_title  =  "Admin"
