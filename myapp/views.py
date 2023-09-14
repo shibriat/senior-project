@@ -38,6 +38,7 @@ import tempfile
 
 
 def get_vin(frame):
+
     # Defining dictionary to translate bangla numbers to english number
     dic = {
         '০': '0',
@@ -51,8 +52,9 @@ def get_vin(frame):
         '৮': '8',
         '৯': '9'
     }
-    # Converting the Image frame from colored to Gray 
+    # 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
     # Preprocess the image to highlight the text regions
     gray = cv2.medianBlur(gray, 5)
     gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
@@ -335,10 +337,10 @@ def register_vehicle(request, owner_id):
                 if form.is_valid():
                     # Save the Object in the RegisteredVehicle Model in the Database
                     form.save()
-                    # Success message
+                    # Success message to the web screen
                     messages.add_message(
                         request, messages.SUCCESS, 'Registered a vehicle on The Following Owner')
-                    # Sending Email notification of the Successful vehicle Registration into the System to the Vehicle owner
+                    # Sending Email notification message of the Successful vehicle Registration into the System to the Vehicle owner
                     try:
                         sendmail(request, f"Successfully Registered Vehicle, VIN: {request.POST['vin']} to {indivs.registered_vehicle_owner}", f"""
 Congratulations {indivs.registered_vehicle_owner},
@@ -380,7 +382,9 @@ def update_owner(request, owner_id):
      
             form = VehicleOwnerForm(request.POST or None, instance=RegisteredVehicleOwner.objects.get(pk=owner_id))
             if form.is_valid():
+                # Saving the model into the database
                 form.save()
+                # Success message to the web screen
                 messages.add_message(
                     request, messages.SUCCESS, 'Vehicle Owner Information Updated in the Database')
                 # Sending Email notification of Updating the person's credentials Successfully into the System to the Registered Person
@@ -394,6 +398,7 @@ License Plate Recognition and Tracking System
 """, request.POST['registered_owner_email'])
                 except:
                     pass
+            # Rendering the HTML page with necessary data
             return render(request, '1_brta_site/manage_person.html', {  'form': form, 
                                                                         'owner_id': owner_id, 
                                                                         'indiv': RegisteredVehicleOwner.objects.get(pk=owner_id), 
@@ -413,6 +418,7 @@ def delete_owner(request, owner_id):
             if indiv:
                 # Deleting the RegisteredVehicleOwner Object
                 indiv.delete()
+                # Rendering the database page
                 return redirect('display-database')
             else:
                 return redirect('home')
@@ -451,7 +457,7 @@ License Plate Recognition and Tracking System
     else:
         return redirect('login')
 
-
+# FUNCTION FOR DELETING VEHICLE FROM THE DATABASE MODEL
 def delete_vehicle(request, vin):
     if request.user.is_authenticated:
         if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
@@ -468,8 +474,6 @@ def delete_vehicle(request, vin):
         return redirect('login')
 
 # Print Vehicle owner details for BRTA Staff users
-
-
 def generate_owner_details(request, owner_id):
     if request.user.is_authenticated:
         if request.user.role == 'BRTA_Staff' or request.user.role == 'Admin':
@@ -549,9 +553,7 @@ def generate_owner_details(request, owner_id):
         return redirect('login')
 ############################################
 
-# SEARCH ITEM
-
-
+# FUNCTION FOR SEARCHING ITEMS FROM THE DATABASE
 def search_item(request):
     if request.user.is_authenticated:
         if request.method == "POST":
@@ -590,6 +592,8 @@ def checkplate_realtime(request):
                         base64.b64decode(frame_data), np.uint8)
                     # Convert numpy array to video frame
                     video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    # Resize the video frame to the new resolution
+                    video_frame = cv2.resize(video_frame, (640, 480))
                 vin = get_vin(video_frame)
                 print(vin)
                 try:
