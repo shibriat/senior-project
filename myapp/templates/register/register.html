@@ -2,23 +2,36 @@
 {% block title %}Register User{% endblock title %}
 {% block content %}
 <div class="container">
-	<br><br>
-	<h2>Register User</h2>
+    <br><br>
+    <h2>Register User</h2>
 
-	{% if messages %}
+    {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{message}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
+    </div>
     {% endfor %}
-  {% endif %}
+    {% endif %}
 
-	<form class="" action="" method="POST"> {% csrf_token %}
-		{{form.as_table}}
-		
-		<input type="submit" class="btn btn-secondary form-control" value="Register" name="submit">
-		
-	</form>
+    <form class="" action="" method="POST">
+        {% csrf_token %}
+        <table class="table">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.role.label_tag }}
+            {{ form.role }}
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {{ form.is_staff.label_tag }}
+            {{ form.is_staff }}
+        </table>
+
+        <input type="submit" class="btn btn-secondary form-control" value="Register" name="submit">
+    </form>
 </div>
 {% endblock content %}

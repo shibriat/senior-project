@@ -1,24 +1,42 @@
 {% extends 'base/base.html' %}
 {% block title %}Users{% endblock title %}
 {% block content %}
-	<div class="container">
-		<br><br>
-		<center><h2>Registered Users List</h2></center>
-			{% if messages %}
-				{% for message in messages %}
-      				<div class="alert alert-warning alert-dismissible fade show" role="alert">
-        				{{message}}
-        				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      				</div>
-    			{% endfor %}
-			{% endif %}
-			<ul class="list-group list-group-flush">
-			{% for indiv in users %}
-				<li class="card">
-					<a href="{% url 'update-user' indiv.id %}">{{indiv}}		|			{{indiv.role}}</a>
-				</li>
-			{% endfor %}
-			</ul>
-		
-	</div>
+  <div class="container">
+    <br><br>
+    <center><h2>Registered Users List</h2></center>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for indiv in users %}
+              <tr>
+                <td>{{ indiv }}</td>
+                <td>{{ indiv.role }}</td>
+                <td>
+                  <a href="{% url 'update-user' indiv.id %}" class="btn btn-primary btn-sm">
+                    Edit
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 {% endblock content %}

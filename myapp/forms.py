@@ -11,12 +11,13 @@ class CreateUserForm(UserCreationForm):
 		fields = ('username', 'email', 'role', 'is_staff', 'password1', 'password2')
 
 		labels = {
-			'username': '',
-			'email': '',
-			'role': '',
-			'password1': '',
-			'password2': '',
-		}
+            'username': 'Username',
+            'email': 'Email',
+            'role': 'Role',
+            'is_staff': 'Is Staff',
+            'password1': 'Password',
+            'password2': 'Confirm Password',
+        }
 
 		widgets = {
 			'username': forms.TextInput(attrs={
