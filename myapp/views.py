@@ -162,7 +162,9 @@ def logout_user(request):
 def display_home_page(request):
     if request.user.is_authenticated:
         # Rendering the Home Page
-        return render(request, 'home/home.html', {})
+        return render(request, 'home/home.html', {  'incident': IncidentVehicular.objects.count(),
+                                                    'vehicle': RegisteredVehicle.objects.count(),
+                                                    'owner': RegisteredVehicleOwner.objects.count()})
     else:
         return redirect('login')
 
