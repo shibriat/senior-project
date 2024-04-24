@@ -4,14 +4,6 @@
 	<div class="container">	
 		<br><br>
 		<center><h5>Register Incident for {{vehicle.registered_owner_id.registered_vehicle_owner}}</h5></center>
-		{% if messages %}
-        	{% for message in messages %}
-		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-		          {{message}}
-		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		        </div>
-		    {% endfor %}
-		{% endif %}
 		<form action="" method="POST"> {% csrf_token %}
 			{{form.incident_title}}
 
