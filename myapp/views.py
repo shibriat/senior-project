@@ -689,19 +689,24 @@ def checkplate_realtime(request):
                     print('\nvin:', vin)
                     print('\ncropped plate:', type(cropped_plate))
                 except:
-                    return redirect('checkplate-realtime')
+                    vin = None
+                    pass
+
                 try:
                     # Converting the numpy array byte image to a byte stream
                     _, buffer = cv2.imencode('.jpg', cropped_plate)
                     
                     # Convert the byte stream to a base64 encoded string
                     base64_image = base64.b64encode(buffer).decode('utf-8')
-
+                except:
+                    base64_image = None
+                    pass
+                try:
                     fs = FileSystemStorage()
                     # Delete the file after processing
                     fs.delete(str(settings.MEDIA_ROOT)+'\\captured.jpg')
                 except:
-                    return redirect('checkplate-realtime')
+                    pass
                 try:
                     vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
@@ -748,7 +753,9 @@ def checkplate_picture(request):
                     # Delete the file after processing
                     fs.delete(saved_file)
                 except:
-                    return redirect('readpicture')
+                    vin = None 
+                    base64_image = None
+                    pass
                 try:
                     vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
