@@ -4,6 +4,14 @@
 <br><br>
 	<div class="container">	
 		<h3>Run Vin</h3>
+		{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
 		<div class="row">
 			<div class="col-md-6">
 				<form action="" method="POST"> {% csrf_token %}

@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from .forms import *
 from .models import *
-
+from django.conf import settings
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -35,63 +35,149 @@ import cv2
 import os
 import tempfile
 
+from ultralytics import YOLO
 
 
-def get_vin(frame):
-
+def get_vin(name):
     # Defining dictionary to translate bangla numbers to english number
-    dic = {
+    dicB2E = {
         '০': '0',
         '১': '1',
         '২': '2',
         '৩': '3',
         '৪': '4',
+        '8': '4',
         '৫': '5',
         '৬': '6',
         '৭': '7',
         '৮': '8',
         '৯': '9'
     }
-    # 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Preprocess the image to highlight the text regions
-    gray = cv2.medianBlur(gray, 5)
-    gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    gray = cv2.erode(gray, None, iterations=1)
+    filtDict = {
+        '5': 'গ',
+        '5|': 'গ',
+        '5 |': 'গ',
+        '9|': 'গ',
+        '[': 'ঢ' ,
+        '[1': 'ঢা',
+        'মেট্রেো': 'মেট্রো',
+        'যেড্রেো': 'মেট্রো',
+        'সেটে': 'মেট্রো',
+        'মেড্রো': 'মেট্রো',
+        'মেঢ্রো': 'মেট্রো',
+        'মট্টো': 'মেট্রো',
+        'মে্রো': 'মেট্রো',
+        'মেস্রো': 'মেট্রো',
+        'মেট': 'মেট্রো',
+        'সেতো': 'মেট্রো',
+        'সেট্রো': 'মেট্রো',
+        'মেদ্রো': 'মেট্রো',
+        '|': '',
+        '.': '',
+        'ভাকা': 'ঢাকা',
+        'ডাকা': 'ঢাকা',
+        '(ঢাকা': 'ঢাকা',
+        'কা': 'ঢাকা',
+        'ঢাক্কা': 'ঢাকা',
+        'ঢাক': 'ঢাকা',
+    }
 
-    # Detect the location of the text regions
-    # boxes = pytesseract.image_to_boxes(gray, lang='ben', config='--oem 3 --psm 3')
+    districts_bd = {
+        "ঢাকা": "Dhaka",
+        "চট্টগ্রাম": "Chittagong",
+        "খুলনা": "Khulna",
+        "বরিশাল": "Barisal",
+        "ময়মনসিংহ": "Mymensingh",
+        "রাজশাহী": "Rajshahi",
+        "সিলেট": "Sylhet",
+        "রংপুর": "Rangpur",
+        "গাজীপুর": "Gazipur",
+        "নারায়ণগঞ্জ": "Narayanganj",
+        "কুমিল্লা": "Comilla",
+        "ফেনী": "Feni",
+        "পাবনা": "Pabna",
+        "বগুড়া": "Bogra",
+        "দিনাজপুর": "Dinajpur",
+        "কুষ্টিয়া": "Kushtia",
+        "ফরিদপুর": "Faridpur",
+        "যশোর": "Jessore",
+        "টাঙ্গাইল": "Tangail",
+        "মুন্সীগঞ্জ": "Munshiganj",
+        "শেরপুর": "Sherpur",
+        "নওগাঁ": "Naogaon",
+        "লক্ষ্মীপুর": "Lakshmipur",
+        "রাজবাড়ী": "Rajbari",
+        "সাতক্ষীরা": "Satkhira",
+        "চুয়াডাঙ্গা": "Chuadanga",
+        "জয়পুরহাট": "Joypurhat",
+        "হবিগঞ্জ": "Habiganj",
+        "পটুয়াখালী": "Patuakhali",
+        "সিরাজগঞ্জ": "Sirajganj",
+        "ভোলা": "Bhola",
+        "মাগুরা": "Magura",
+        "ঝিনাইদহ": "Jhenaidah",
+        "নরসিংদী": "Narsingdi",
+        "গোপালগঞ্জ": "Gopalganj",
+        "মাদারীপুর": "Madaripur",
+        "জামালপুর": "Jamalpur",
+        "নড়াইল": "Narail",
+        "বান্দরবান": "Bandarban",
+        "ব্রাহ্মণবাড়িয়া": "Brahmanbaria",
+        "কক্সবাজার": "Cox's Bazar",
+        "খাগড়াছড়ি": "Khagrachhari",
+        "মানিকগঞ্জ": "Manikganj",
+        "নীলফামারী": "Nilphamari",
+        "রাঙ্গামাটি": "Rangamati",
+        "ঠাকুরগাঁও": "Thakurgaon"
+    }
     
-    # Extracting all the Text From the Image Frame as Bangla and Parse it to the String
-    results = pytesseract.image_to_string(gray, lang='ben', config='--psm 3')
     
-    print(results)
-    # Using RegEX to filter Bangla Integer Number and store in texts as string
-    texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
-    vins = ""
-    for text in texts:
-        if text is not None:
-            vins = vins + text
-    del texts
-    vin = ""
-    for text in vins:
-        # Using Dictionary "dic" convert the Bangla Number to English Integer Number
-        vin = vin + str(dic[text])
-    del vins
+    # Load YOLO models
+    ultralytics_model = YOLO('yolov8n.pt')
+    license_plate_detector = YOLO(str(settings.BASE_DIR)+'\\myapp\\'+'best.pt')
 
-    # Checking if the length of processed vin is equals to 6
-    if len(vin) == 6:
-        # Return the vin Number
-        return str(vin)
-    # If the length of processed vin is not equals to 6 the do the steps all over again
-    else:
-        results = pytesseract.image_to_string(gray, lang='ben', config='--psm 6')
-        print(results)
+    # Load image frame
+    frame = cv2.imread(str(settings.MEDIA_ROOT)+'\\'+name)
+    results = license_plate_detector(frame)
 
+    for i in range(0, len(results[0].boxes.xyxy)):
+        x1, y1, x2, y2 = map(int, results[0].boxes.xyxy.tolist()[i])
+        cropped_plate = frame[y1:y2, x1:x2]
+
+        gray = cv2.cvtColor(cropped_plate, cv2.COLOR_BGR2GRAY)
+
+        # Preprocess the image to highlight the text regions
+        gray = cv2.medianBlur(gray, 5)
+
+    
+    
+    
+        # Extracting all the Text From the Image Frame as Bangla and Parse it to the Data Frame/ Dictionary
+        data_with_conf = pytesseract.image_to_data(gray, lang='ben', config='--psm 6', output_type=pytesseract.Output.DICT)
         
-        texts = re.findall("[০১২৩৪৫৬৭৮৯]*", results)
+        # Extracting all the Text From the Image Frame as Bangla and Parse it to the String
+        data = pytesseract.image_to_string(gray, lang='ben', config='--psm 6')
+        print(data)
+
+        # Iterate through each word in the data
+        for i in range(len(data_with_conf['text'])):
+            if int(data_with_conf['conf'][i]) > -1:  # Checking if the confidence is valid
+                text = data_with_conf['text'][i]
+                conf = data_with_conf['conf'][i]
+                
+                pattern = r'[\u0985-\u09B9\u09BC-\u09C4\u09C7-\u09CE\u09D7\u09DC-\u09E3]+'
+                letters = re.findall(pattern, text)
+                numbers = re.findall("[০১২৩৪৫৬৭৮৯]*", text)
+                try:
+                    print('Bangla Letters in Eng:', districts_bd[f'{letters}'])
+                except:
+                    print('Bangla Letters:', letters)
+                print('Bangla Numbers:', numbers)
+                print(f"Detected text: {text} - Confidence: {conf}")
         
+        # Using RegEX to filter Bangla Integer Number and store in texts as string
+        texts = re.findall("[০১২৩৪৫৬৭৮৯]*", data)
         vins = ""
         for text in texts:
             if text is not None:
@@ -99,11 +185,10 @@ def get_vin(frame):
         del texts
         vin = ""
         for text in vins:
-            vin = vin + str(dic[text])
+            # Using Dictionary "dicB2E" convert the Bangla Number to English Integer Number
+            vin = vin + str(dicB2E[text])
         del vins
-
-        if len(vin) == 6:
-            return str(vin)
+        return vin, cropped_plate
 
 # Function of SMTP Mail the notification to the users
 def sendmail(request, subject, message, email_receiver):
@@ -581,23 +666,41 @@ def search_item(request):
 
 # POLICE
 
+
 def checkplate_realtime(request):
     if request.user.is_authenticated:
         if request.user.role == 'Police' or request.user.role == 'Admin':
             if request.method == 'POST':
-                frame_data = request.POST['frame_data']
-                video_frame = ''
-                if frame_data:
-                    # Convert frame_data from base64 to numpy array
-                    frame_data = frame_data.split(',')[1]
-                    nparr = np.frombuffer(
-                        base64.b64decode(frame_data), np.uint8)
-                    # Convert numpy array to video frame
-                    video_frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                    # Resize the video frame to the new resolution
-                    video_frame = cv2.resize(video_frame, (640, 480))
-                vin = get_vin(video_frame)
-                print(vin)
+                image = request.POST['frame_data']
+                print(type(image))
+                if image:
+
+                    # Remove the header from the base64 encoded data
+                    base64_data = image.split(",")[1]
+
+                    # Decode the base64 data
+                    binary_data = base64.b64decode(base64_data)
+
+                    # Save the image to a file
+                    with open(str(settings.MEDIA_ROOT)+'\\captured.jpg', "wb") as f:
+                        f.write(binary_data)
+                try:
+                    vin, cropped_plate = get_vin('captured.jpg')
+                    print('\nvin:', vin)
+                    print('\ncropped plate:', type(cropped_plate))
+                except:
+                    return redirect('checkplate-realtime')
+
+                # Converting the numpy array byte image to a byte stream
+                _, buffer = cv2.imencode('.jpg', cropped_plate)
+                
+                # Convert the byte stream to a base64 encoded string
+                base64_image = base64.b64encode(buffer).decode('utf-8')
+
+                fs = FileSystemStorage()
+                # Delete the file after processing
+                fs.delete(str(settings.MEDIA_ROOT)+'\\captured.jpg')
+
                 try:
                     vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
@@ -606,24 +709,42 @@ def checkplate_realtime(request):
                     vehicle = None
                     felonys = None
                 
-                return render(request, '1_police_site/check_realtime.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, })
+                return render(request, '1_police_site/check_realtime.html', {   'vin': vin, 
+                                                                                'vehicle': vehicle, 
+                                                                                'felonys': felonys, 
+                                                                                'cropped_plate': base64_image})
             return render(request, '1_police_site/check_realtime.html', {})
         else:
             return redirect('home')
     else:
         return redirect('login')
 
-
 def checkplate_picture(request):
     if request.user.is_authenticated:
         if request.user.role == 'Police' or request.user.role == 'Admin':
             if request.method == 'POST':
                 image = request.FILES.get('image')
-                # Convert the bytes to a NumPy array
-                image_bytes = image.read()
-                image_array = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), -1)
-                vin = get_vin(image_array)
+                print(type(image))
+                # Save the original file
+                fs = FileSystemStorage()
+                saved_file = fs.save(image.name, image)
+
+                # Get the URL of the saved file
+                saved_file_url = fs.url(saved_file)
+               
+                vin, cropped_plate = get_vin(image.name)
+
                 print('\nvin:', vin)
+                print('\ncropped plate:', type(cropped_plate))
+                
+                # Converting the numpy array byte image to a byte stream
+                _, buffer = cv2.imencode('.jpg', cropped_plate)
+                
+                # Convert the byte stream to a base64 encoded string
+                base64_image = base64.b64encode(buffer).decode('utf-8')
+
+                # Delete the file after processing
+                fs.delete(saved_file)
                 try:
                     vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
@@ -631,7 +752,10 @@ def checkplate_picture(request):
                     vehicle = None
                     felonys = None
 
-                return render(request, '1_police_site/read_picture.html', {'vin': vin, 'vehicle': vehicle, 'felonys': felonys, })
+                return render(request, '1_police_site/read_picture.html', { 'vin': vin, 
+                                                                            'vehicle': vehicle, 
+                                                                            'felonys': felonys,
+                                                                            'cropped_plate': base64_image })
             return render(request, '1_police_site/read_picture.html', {})
         else:
             return redirect('home')

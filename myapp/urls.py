@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from . import views
 
@@ -38,3 +40,6 @@ urlpatterns = [
 	path('generate-bill/<str:incident_id>', views.generate_bill, name='generate-bill'),
 	path('generate-details/<str:owner_id>', views.generate_vehicle_owner_details, name='generate-details'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

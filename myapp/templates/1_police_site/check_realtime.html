@@ -16,14 +16,26 @@
 		<form id="frame-form" method="post" enctype="multipart/form-data">
 		    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 		    <input type="hidden" id="frame-data" name="frame_data"> <br>
-		    <button type="submit" class="btn btn-success">Check Licence Plate</button>
-		    <p>Scanned VIN: {{vin}}</p>
+		    <button type="submit" class="btn btn-success">Check License Plate</button>
 		</form>
+		<hr>
+		{% if cropped_plate %}
+			<img width="300" src="data:image/jpeg;base64,{{ cropped_plate }}" alt="Cropped License Plate">
+		{% endif %}
+		<p>Scanned VIN: {{vin}}</p>
 		{% if vin and vehicle is None %}
 			<p>No Vehicle found having this VIN: {{vin}}</p>
 		{% endif %}
 		
 	</div>
+	{% if messages %}
+        	{% for message in messages %}
+		        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+		          {{message}}
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		        </div>
+		    {% endfor %}
+		{% endif %}
 	{% if vehicle %}
 		<div class="container">	
 			<label for="city">City Name:</label>
@@ -62,7 +74,9 @@
 		var context = canvas.getContext("2d");
 
 
-		navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment"}})
+		navigator.mediaDevices.getUserMedia({ 
+			video: { facingMode: "environment",
+			frameRate: { ideal: 20, max: 20 } }})
 	    .then(function(stream) {
 	        video.srcObject = stream;
 	    })

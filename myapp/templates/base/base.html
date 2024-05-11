@@ -14,8 +14,6 @@
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <!-- Theme style -->
   <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
-  <!-- Sweet Alert -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css">
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -226,7 +224,7 @@
         LPRS
       </div>
       <!-- Default to the left -->
-      <strong>Copyright &copy; 2023</strong> All rights reserved.
+      <strong>Copyright &copy; 2024</strong> All rights reserved.
     </footer>
   </div>
   <!-- ./wrapper -->
@@ -239,25 +237,6 @@
   <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <!-- AdminLTE App -->
   <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
-  <!-- Sweet Alert -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
-  <script>
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-right',
-        showConfirmButton: false,
-        timer: 5000,
-        timerProgressBar: true
-    });
-    {% if messages %}
-        {% for message in messages %}
-            Toast.fire({
-                icon: 'info',
-                title: '{{message}}'
-            }); 
-        {% endfor %}
-    {% endif %}    
-</script>
 </body>
 
 </html>
