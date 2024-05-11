@@ -2,23 +2,16 @@
 
 ## Frameworks and technologies used
 
-![Python](README_MD/python.png)
+| Python | Django |
+|----------|----------|
+|  ![Python](README_MD/python.png)    | ![Django](README_MD/django.png)   |
 
-Python
 
-![Django](README_MD/django.png)
+| OpenCV | Tesseract OCR |
+|----------|----------|
+|  ![Open CV](README_MD/opencv.webp)    | ![Tesseract OCR](README_MD/tesseract_ocr.png)   |
 
-Django Web frameworks
-
-![Open CV](README_MD/opencv.webp)
-
-OpenCV
-
-![Tesseract OCR](README_MD/tesseract_ocr.png)
-
-Tesseract OCR
-
-#### YOLO V8 from Ultralytics 
+#### YOLO V8 Machine Learning Architecture from Ultralytics 
 ![YOLOv8 from Ultralytics](README_MD/yolov8.png)
 
 
