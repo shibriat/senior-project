@@ -15,18 +15,29 @@
 ![YOLOv8 from Ultralytics](README_MD/yolov8.png)
 
 
+We use YOLOv8 from Ultralytics Ltd. to train the provided datasets, validate, test and deploy the  
 
+# Deployed Demo Web Application
 To check the site go to https://lprts.onrender.com/
 
-user id = arif, password = 1830398
+Username and Password
 
 
-user id = asif, password = 1831066
+| Username | Password |
+|----------|----------|
+|  arif  |  1830398  |
+|  asif  |  1831066  |
+|  farhan  |  1810615  |
+|  shibriat  |  1831099  |
 
 
-user id = farhan, password = 1810615
+# Top Contributors
+| Student ID | Student Name |
+|----------|----------|
+|  1830398  |  S.M. Arif Mahmud  |
+|  1831066  |  Ahmad Asif Arifeen  |
+|  1810615  |  S.M. Farhan Ishrak  |
+|  1831099  |  Shibriat Hossain  |
 
-
-user id = shibriat, password = 1831099
 
 
