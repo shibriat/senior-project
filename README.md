@@ -8,7 +8,7 @@
 #### OpenCV
 ![Open CV](README_MD/opencv.webp)
 #### Tesseract OCR
-![Tesseract OCR](README_MD/tesseract_ocr.webp)
+![Tesseract OCR](README_MD/tesseract_ocr.jpg)
 
 
 #### YOLO V8 from Ultralytics 
