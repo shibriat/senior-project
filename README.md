@@ -15,7 +15,8 @@
 ![YOLOv8 from Ultralytics](README_MD/yolov8.png)
 
 
-We use YOLOv8 from Ultralytics Ltd. to train the provided datasets, validate, test and deploy the  
+We use YOLOv8 from Ultralytics Ltd. to train the provided datasets, validate, test and deploy the the Trained Model and saved the model as "best.pt"
+
 
 # Deployed Demo Web Application
 To check the site go to https://lprts.onrender.com/
