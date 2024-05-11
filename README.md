@@ -3,14 +3,19 @@
 ## Frameworks and technologies used
 
 ![Python](README_MD/python.png)
+
 Python
+
 ![Django](README_MD/django.png)
+
 Django Web frameworks
 
 ![Open CV](README_MD/opencv.webp)
+
 OpenCV
 
 ![Tesseract OCR](README_MD/tesseract_ocr.png)
+
 Tesseract OCR
 
 #### YOLO V8 from Ultralytics 
