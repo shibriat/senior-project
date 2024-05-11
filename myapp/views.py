@@ -690,17 +690,18 @@ def checkplate_realtime(request):
                     print('\ncropped plate:', type(cropped_plate))
                 except:
                     return redirect('checkplate-realtime')
+                try:
+                    # Converting the numpy array byte image to a byte stream
+                    _, buffer = cv2.imencode('.jpg', cropped_plate)
+                    
+                    # Convert the byte stream to a base64 encoded string
+                    base64_image = base64.b64encode(buffer).decode('utf-8')
 
-                # Converting the numpy array byte image to a byte stream
-                _, buffer = cv2.imencode('.jpg', cropped_plate)
-                
-                # Convert the byte stream to a base64 encoded string
-                base64_image = base64.b64encode(buffer).decode('utf-8')
-
-                fs = FileSystemStorage()
-                # Delete the file after processing
-                fs.delete(str(settings.MEDIA_ROOT)+'\\captured.jpg')
-
+                    fs = FileSystemStorage()
+                    # Delete the file after processing
+                    fs.delete(str(settings.MEDIA_ROOT)+'\\captured.jpg')
+                except:
+                    return redirect('checkplate-realtime')
                 try:
                     vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
@@ -723,28 +724,31 @@ def checkplate_picture(request):
     if request.user.is_authenticated:
         if request.user.role == 'Police' or request.user.role == 'Admin':
             if request.method == 'POST':
-                image = request.FILES.get('image')
-                print(type(image))
-                # Save the original file
-                fs = FileSystemStorage()
-                saved_file = fs.save(image.name, image)
+                try:
+                    image = request.FILES.get('image')
+                    print(type(image))
+                    # Save the original file
+                    fs = FileSystemStorage()
+                    saved_file = fs.save(image.name, image)
 
-                # Get the URL of the saved file
-                saved_file_url = fs.url(saved_file)
-               
-                vin, cropped_plate = get_vin(image.name)
+                    # Get the URL of the saved file
+                    saved_file_url = fs.url(saved_file)
+                   
+                    vin, cropped_plate = get_vin(image.name)
 
-                print('\nvin:', vin)
-                print('\ncropped plate:', type(cropped_plate))
-                
-                # Converting the numpy array byte image to a byte stream
-                _, buffer = cv2.imencode('.jpg', cropped_plate)
-                
-                # Convert the byte stream to a base64 encoded string
-                base64_image = base64.b64encode(buffer).decode('utf-8')
+                    print('\nvin:', vin)
+                    print('\ncropped plate:', type(cropped_plate))
+                    
+                    # Converting the numpy array byte image to a byte stream
+                    _, buffer = cv2.imencode('.jpg', cropped_plate)
+                    
+                    # Convert the byte stream to a base64 encoded string
+                    base64_image = base64.b64encode(buffer).decode('utf-8')
 
-                # Delete the file after processing
-                fs.delete(saved_file)
+                    # Delete the file after processing
+                    fs.delete(saved_file)
+                except:
+                    return redirect('readpicture')
                 try:
                     vehicle = RegisteredVehicle.objects.get(pk=vin)
                     felonys = IncidentVehicular.objects.filter(vin__pk=vin)
