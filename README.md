@@ -1,5 +1,15 @@
 ![Demo](README_MD/brave_AdPuw7W7F2.gif)
 
+## Frameworks and technologies used
+![Python](README_MD/python.png)
+![Django](README_MD/django.png)
+![Open CV](README_MD/opencv.webp)
+![Tesseract OCR](README_MD/tesseract_ocr.webp)
+
+
+
+![YOLOv8 from Ultralytics](README_MD/yolov8.png)
+
 
 
 To check the site go to https://lprts.onrender.com/
