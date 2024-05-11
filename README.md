@@ -1,15 +1,17 @@
 ![Demo](README_MD/brave_AdPuw7W7F2.gif)
 
 ## Frameworks and technologies used
-#### Python
-![Python](README_MD/python.png)
-#### Django Web frameworks
-![Django](README_MD/django.png)
-#### OpenCV
-![Open CV](README_MD/opencv.webp)
-#### Tesseract OCR
-![Tesseract OCR](README_MD/tesseract_ocr.png)
 
+![Python](README_MD/python.png)
+Python
+![Django](README_MD/django.png)
+Django Web frameworks
+
+![Open CV](README_MD/opencv.webp)
+OpenCV
+
+![Tesseract OCR](README_MD/tesseract_ocr.png)
+Tesseract OCR
 
 #### YOLO V8 from Ultralytics 
 ![YOLOv8 from Ultralytics](README_MD/yolov8.png)
