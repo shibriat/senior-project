@@ -78,11 +78,11 @@ license_plate_detector = YOLO(str(settings.BASE_DIR)+'\\myapp\\'+'best.pt')
                 text = data_with_conf['text'][i]
                 conf = data_with_conf['conf'][i]
                 
-                # Using the RegEX to filter the bangla letters
+                # Using the RegEX to filter to bangla letters
                 pattern = r'[\u0985-\u09B9\u09BC-\u09C4\u09C7-\u09CE\u09D7\u09DC-\u09E3]+'
                 letters = re.findall(pattern, text)
                 
-                # Using the RegEX to filter the bangla numbers
+                # Using the RegEX to filter to bangla numbers
                 numbers = re.findall("[০১২৩৪৫৬৭৮৯]*", text)
                 try:
                     print('Bangla Letters in Eng:', districts_bd[f'{letters}'])
@@ -112,9 +112,9 @@ Username and Password
 | Student ID | Student Name |
 |----------|----------|
 |  1830398  |  S.M. Arif Mahmud  |
+|  1831099  |  Shibriat Hossain  |
 |  1831066  |  Ahmad Asif Arifeen  |
 |  1810615  |  S.M. Farhan Ishrak  |
-|  1831099  |  Shibriat Hossain  |
 
 
 
