@@ -21,6 +21,10 @@
 
 We use YOLOv8 from Ultralytics Ltd. to train the provided datasets, validate, test and deploy the the Trained Model and saved the model as "best.pt". 
 
+
+Here are the dataset to train the model: https://universe.roboflow.com/kaiser-durden/bangladeshi-license-plate-fonfq/
+
+
 Here is the code for training the Datasets of Bangla Licenseplates
 ```python
 from ultralytics import YOLO
