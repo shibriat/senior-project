@@ -195,7 +195,7 @@ def sendmail(request, subject, message, email_receiver):
     if request.user.is_authenticated:
         if request.user.role == 'Police' or request.user.role == 'Admin' or request.user.role == 'BRTA_Staff':
             email_sender = 'licenseplatetrackingsystem@gmail.com'
-            email_password = 'ugpyqehmekreaylw'
+            email_password = '--TOP-SECRET--'
 
             body = f"""
 			{message}
